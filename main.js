@@ -272,7 +272,11 @@ function handle_fetch_pubchem_rest(json, compound_dict) {
   // Get ChEBI from synonyms
   var ChEBI = compound_dict['synonyms'].find(value => /^C[Hh]EBI:[0-9]+$/.test(value));
   if (ChEBI) {
-    ChEBI = ChEBI.match(/(?<=^C[Hh]EBI:)[0-9]+$/)[0];
+    // Remove 'ChEBI:' from start of string
+    ChEBI = ChEBI.replace(/^C[Hh]EBI:/, '');
+    ChEBI = ChEBI.match(/^[0-9]+$/)[0];
+    // Prior way using positive lookbehind
+    //ChEBI = ChEBI.match(/(?<=^C[Hh]EBI:)[0-9]+$/)[0];
     compound_dict['ChEBI'] = ChEBI;
   }
 
@@ -281,19 +285,24 @@ function handle_fetch_pubchem_rest(json, compound_dict) {
   // http://chembl.blogspot.com/2011/08/chembl-identifiers.html
   var ChEMBL = compound_dict['synonyms'].find(value => /^C[Hh]EMBL[0-9]+$/.test(value));
   if (ChEMBL) {
-    ChEMBL = ChEMBL.match(/(?<=^C[Hh]EMBL)[0-9]+$/)[0];
+    // Remove 'ChEMBL' from start of string
+    ChEMBL = ChEMBL.replace(/^C[Hh]EMBL/, '');
+    ChEMBL = ChEMBL.match(/^[0-9]+$/)[0];
+    // Prior way using positive lookbehind
+    //ChEMBL = ChEMBL.match(/(?<=^C[Hh]EBI:)[0-9]+$/)[0];
     compound_dict['ChEMBL'] = ChEMBL;
   }
 
-  // Get KEGG from synonyms
+  // Get KEGG compound ID and/or drug ID from synonyms
   // KEGG takes the form of 'C' for compound or 'D' for drug then five digits
   // https://www.genome.jp/kegg/kegg3.html
-  var KEGG = compound_dict['synonyms'].find(value => /^D[0-z]{5}$/.test(value));
-  if (!KEGG) {
-    KEGG = compound_dict['synonyms'].find(value => /^C[0-z]{5}$/.test(value));
+  var KEGG_drug = compound_dict['synonyms'].find(value => /^D[0-9]{5}$/.test(value));
+  if (KEGG_drug) {
+    compound_dict['KEGGdrug'] = KEGG_drug;
   }
-  if (KEGG) {
-    compound_dict['KEGG'] = KEGG;
+  var KEGG_compound = compound_dict['synonyms'].find(value => /^C[0-9]{5}$/.test(value));
+  if (KEGG_compound) {
+    compound_dict['KEGGcompound'] = KEGG_compound;
   }
 
   fetch_chemidplus_json(compound_dict);
@@ -528,6 +537,16 @@ function make_drugbox(compound_dict) {
   compoundbox_string += `| PubChem = ` + compound_dict['CID'] + `\n`;
 
   compoundbox_string += `| PubChemSubstance = \n`;
+
+  // Guide to Pharmacology / IUPHAR ligand
+  // https://www.guidetopharmacology.org/GRAC/LigandListForward?database=all
+  // To-do: fill this in automatically?
+  // https://www.guidetopharmacology.org/webServices.jsp
+  // ^ No API key needed
+  // https://www.guidetopharmacology.org/services/ligands?inchikey=LKJPYSCBVHEWIU-UHFFFAOYSA-N
+  // ^ Result: result[0]['ligandId'] // 2863
+  // But has two entries for E2... ID 1012 and 1013 (good one)
+  // https://www.guidetopharmacology.org/services/ligands?inchikey=VOXZDWNPVJITMN-ZBRFXRBCSA-N
   compoundbox_string += `| IUPHAR_ligand = \n`;
 
   // DrugBank
@@ -550,8 +569,10 @@ function make_drugbox(compound_dict) {
 
   // KEGG
   // To-do: more sure-fire KEGG filling?
-  if (compound_dict['KEGG']) {
-    compoundbox_string += `| KEGG = ` + compound_dict['KEGG'] + `\n`;
+  if (compound_dict['KEGGdrug']) {
+    compoundbox_string += `| KEGG = ` + compound_dict['KEGGdrug'] + `\n`;
+  } else if (compound_dict['KEGGcompound']) {
+    compoundbox_string += `| KEGG = ` + compound_dict['KEGGcompound'] + `\n`;
   } else {
     compoundbox_string += `| KEGG = \n`;
   }
@@ -573,7 +594,7 @@ function make_drugbox(compound_dict) {
   }
 
   // Warning about not-100%-certainty with KEGG, ChEBI, and ChEMBL identifiers for now
-  if (compound_dict['KEGG'] || compound_dict['ChEBI'] || compound_dict['ChEMBL']) {
+  if (compound_dict['KEGGdrug'] || compound_dict['KEGGcompound'] || compound_dict['ChEBI'] || compound_dict['ChEMBL']) {
     update_user_message('add', 'green', 'Autofilled ChEBI, ChEMBL, and/or KEGG with form-matching identifiers from the PubChem synonyms list. Please double check them for accuracy.');
   }
 
