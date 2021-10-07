@@ -51,13 +51,33 @@ window.onpopstate = function(event) {
   return;
 };
 
+// Escape all strings in object (including nested)
+function escape_all(object) {
+  for (var key in object) {
+    if (!object.hasOwnProperty(key)) {
+      continue;
+    }
+    if (typeof object[key] !== 'object') {
+      object[key] = escape_plaintext_for_wikicode(object[key]);
+    } else {
+      escape_all(object[key]);
+    }
+  }
+  return object;
+}
+
 // Escape plaintext for wikicode in string (via <nowiki></nowiki>)
-function escape_compoundbox_field_for_wikicode(string) {
+// Also converts undefined variables to ''
+function escape_plaintext_for_wikicode (string) {
   if (string) {
     string = String(string);
-    if (string.match(/([|]|\[{2,}|\]{2,}|{|}|'{2,}|<|>)/)) {
+    // Escape |, [[, ]], {{, }}, '', <, >
+    // Doesn't currently catch `[https://site.com/]` format links
+    if (string.match(/([|]|\[{2,}|\]{2,}|[{]{2,}|[}]{2,}|'{2,}|<|>)/)) {
       string = '<nowiki>' + string + '</nowiki>';
     }
+  } else {
+    string = '';
   }
   return string;
 }
@@ -249,7 +269,7 @@ function handle_fetch_pubchem_rest(json, compound_dict) {
   compound_dict = Object.assign({}, compound_dict, properties);
 
   // If standard/simple chemical formula
-  // Another/different one to look at (no Lodash): https://github.com/kanedaron/chemical-regex
+  // Another/different handling library to look at (no Lodash): https://github.com/kanedaron/chemical-regex
   if (compound_dict['MolecularFormula']) {
     // Chemical formula regex: /^([A-Z][a-z]?[0-9]{0,6})+$/ (no longer used here for now)
     // Largest known protein is titin (connectin), with formula of C(169,719)H(270,466)N(45,688)O(52,238)S(911)
@@ -431,6 +451,10 @@ function handle_fetch_chemidplus(json, compound_dict) {
 
 // Construct Wikipedia drugbox/chembox
 function construct_compoundbox(compound_dict) {
+
+  // Escape special characters with <nowiki> tags
+  // Also convert undefined variables to ''
+  compound_dict = escape_all(compound_dict);
 
   // var boxtype = document.getElementById('box_type');
   var box_type = 'drugbox';
@@ -617,7 +641,7 @@ function make_drugbox(compound_dict) {
         synonyms_string += '; ';
       }
     }
-    compoundbox_string += `| synonyms = ` + escape_compoundbox_field_for_wikicode(synonyms_string) + `\n`;
+    compoundbox_string += `| synonyms = ` + synonyms_string + `\n`;
 
     // Warning about long synonyms fields as applicable (maybe handle differently in the future)
     if (synonyms_string.length > 500) {
@@ -633,32 +657,28 @@ function make_drugbox(compound_dict) {
 
   // IUPAC name
   if (compound_dict['IUPACName']) {
-    compoundbox_string += `| IUPAC_name = ` + escape_compoundbox_field_for_wikicode(compound_dict['IUPACName']) + `\n`;
+    compoundbox_string += `| IUPAC_name = ` + compound_dict['IUPACName'] + `\n`;
   } else {
     compoundbox_string += `| IUPAC_name = \n`;
   }
 
   // Chemical formula
   if (compound_dict['MolecularFormula']) {
-    if (typeof compound_dict['MolecularFormula'] === 'string' || compound_dict['MolecularFormula'] instanceof String) {
-      compoundbox_string += `| chemical_formula = ` + compound_dict['MolecularFormula'] + `\n`;
-    } else {
-      var index = 0;
-      for (const [key, value] of Object.entries(compound_dict['MolecularFormula'])) {
-        if (chemical_symbols.includes(key)) {
-          if (index == 0) {
-            compoundbox_string += `| ` + key + `=` + value;
-          } else {
-            compoundbox_string += ` | ` + key + `=` + value;
-          }
+    var index = 0;
+    for (const [key, value] of Object.entries(compound_dict['MolecularFormula'])) {
+      if (chemical_symbols.includes(key)) {
+        if (index == 0) {
+          compoundbox_string += `| ` + key + `=` + value;
+        } else {
+          compoundbox_string += ` | ` + key + `=` + value;
         }
-        index++;
       }
-      if (compound_dict['Charge']) {
-        compoundbox_string += ` | charge = ` + compound_dict['Charge'];
-      }
-      compoundbox_string += `\n`;
+      index++;
     }
+    if (compound_dict['Charge']) {
+      compoundbox_string += ` | charge = ` + compound_dict['Charge'];
+    }
+    compoundbox_string += `\n`;
   }
 
   // No longer needed, automatically calculated by template drugbox (except unusual cases?)
