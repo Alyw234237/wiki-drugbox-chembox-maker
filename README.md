@@ -17,7 +17,3 @@ See also [Help:Citation tools - English Wikipedia](https://en.wikipedia.org/wik
 
 <!-- To add to left sidebar on Wikipedia for quicker access, see User:XXXXX/scripts/XXXXX. -->
 
-ipts/XXXXX. -->
-
-ipts/XXXXX. -->
-
