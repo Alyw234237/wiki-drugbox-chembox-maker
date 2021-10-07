@@ -421,9 +421,23 @@ function handle_fetch_chemidplus(json, compound_dict) {
 }
 
 // Construct Wikipedia drugbox/chembox
-// https://en.wikipedia.org/wiki/Template:Infobox_drug (same as Template:Drugbox (redirect))
-// https://en.wikipedia.org/wiki/Template:Chembox
 function construct_compoundbox(compound_dict) {
+
+  // var boxtype = document.getElementById('box_type');
+  var box_type = 'drugbox';
+
+  if (box_type == 'drugbox') {
+    make_drugbox(compound_dict);
+  } else if (box_type == 'chembox') {
+    make_chembox(compound_dict);
+  }
+
+  return;
+}
+
+// Make Wikipedia drugbox
+// https://en.wikipedia.org/wiki/Template:Infobox_drug (same as Template:Drugbox (redirect))
+function make_drugbox(compound_dict) {
 
   var compoundbox_string = `{{Infobox drug
 | drug_name = 
@@ -682,22 +696,90 @@ function construct_compoundbox(compound_dict) {
 | specific_rotation = 
 }}`;
 
-  // Do extra stuff? (I.e., start article?)
+  // Add some more stuff?
   var add_more_stuff = false;
   if (add_more_stuff == true) {
-    compoundbox_string += `\n\n`;
-    if (compound_dict['ChemIDplus'] && compound_dict['ChemIDplus']['name_special']) {
-      compoundbox_string += `'''` + compound_dict['ChemIDplus']['name_special'] + `''' is a ...`;
-    } else if (compound_dict['Title']) {
-      compoundbox_string += `'''` + compound_dict['Title'] + `''' is a ...`;
-    }
-    compoundbox_string += `\n\n`;
-    compoundbox_string += `==References==\n{{Reflist}}\n\n`;
+    compoundbox_string = add_more_stuff(compoundbox_string);
   }
 
   // Do after construct compoundbox stuff
 
   update_compoundbox(compoundbox_string);
+
+  return compoundbox_string;
+}
+
+// Make Wikipedia chembox
+// https://en.wikipedia.org/wiki/Template:Chembox
+function make_chembox(compound_dict) {
+
+  var compoundbox_string = `{{Chembox
+<!-- Images -->
+| ImageFile = 
+| ImageSize = 
+| ImageAlt = 
+<!-- Names -->
+| IUPACName = 
+| OtherNames = 
+<!-- Sections -->
+| Section1 = {{Chembox Identifiers
+| CASNo = 
+| ChEBI = 
+| ChEMBL = 
+| ChemSpiderID = 
+| DrugBank = 
+| EINECS = 
+| EC_number = 
+| EC_number_Comment = 
+| InChI = 
+| InChIKey = 
+| KEGG = 
+| MeSHName = 
+| PubChem = 
+| SMILES = 
+  }}
+| Section2 = {{Chembox Properties
+| Formula = 
+| MolarMass = 
+| Appearance = 
+| Density = 
+| MeltingPt = 
+| BoilingPt = 
+| Solubility = 
+  }}
+| Section3 = {{Chembox Hazards
+| MainHazards = 
+| FlashPt = 
+| AutoignitionPt = 
+  }}
+}}`;
+
+  // ...
+
+  // Add some more stuff?
+  var add_more_stuff = false;
+  if (add_more_stuff == true) {
+    compoundbox_string = add_more_stuff(compoundbox_string);
+  }
+
+  // Do after construct compoundbox stuff
+
+  update_compoundbox(compoundbox_string);
+
+  return compoundbox_string;
+}
+
+// Do some extra stuff? (I.e., start article)
+function add_more_stuff(compoundbox_string) {
+
+  compoundbox_string += `\n\n`;
+  if (compound_dict['ChemIDplus'] && compound_dict['ChemIDplus']['name_special']) {
+    compoundbox_string += `'''` + compound_dict['ChemIDplus']['name_special'] + `''' is a ...`;
+  } else if (compound_dict['Title']) {
+    compoundbox_string += `'''` + compound_dict['Title'] + `''' is a ...`;
+  }
+  compoundbox_string += `\n\n`;
+  compoundbox_string += `==References==\n{{Reflist}}\n\n`;
 
   return compoundbox_string;
 }
