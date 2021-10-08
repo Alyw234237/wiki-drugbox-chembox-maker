@@ -45,6 +45,10 @@ More:
 
 ### Others
 
+* InChIKey to ChemSpiderID (CSID) (no API key required! but only XML output): http://www.chemspider.com/InChI.asmx
+  * Example (E2 with encodeURI("InChI=..."):
+    * https://www.chemspider.com/InChI.asmx/InChIToCSID?inchi=InChI%3D1S%2FC18H24O2%2Fc1-18-9-8-14-13-5-3-12%2819%2910-11%2813%292-4-15%2814%2916%2818%296-7-17%2818%2920%2Fh3%2C5%2C10%2C14-17%2C19-20H%2C2%2C4%2C6-9H2%2C1H3%2Ft14-%2C15-%2C16%2B%2C17%2B%2C18%2B%2Fm1%2Fs1
+  * xml2json (JS): https://stackoverflow.com/questions/1773550/convert-xml-to-json-and-back-using-javascript
 * ChemSpiderID? (requires API key): https://developer.rsc.org/
 * DrugBank (requires API key): https://docs.drugbank.com/v1/
 * GSRS-API is fantastic (CAS (primary vs. non-primary), UNII, ChEMBL, DrugBank, INN, etc.). But only substances in medicines sadly.
