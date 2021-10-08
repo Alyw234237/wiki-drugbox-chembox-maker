@@ -86,18 +86,36 @@
   <body style="max-width: 800px;">
     <div style="width: 100%;">
       <h1>Wikipedia Drugbox and Chembox Maker</h1>
-      <form autocomplete="off">
-        <!-- Prevent implicit submission of the form -->
-        <button type="submit" disabled style="display: none" aria-hidden="true"></button>
-        <label for="identifier">PubChem compound ID (CID) or URL, compound name, or synonym:</label><br />
-        <input type="text" id="identifier" name="identifier" onchange="parse_input()" style="width: 100%; margin-top: 5px;" autofocus spellcheck="false"><br /><br />
+      <form autocomplete="off" onsubmit="parse_input(); return false;" method="POST">
+        <!-- Compound identifier input box -->
+        <div>
+          <label for="identifier">PubChem compound ID (CID) or URL, compound name, or synonym:</label><br />
+          <input type="text" id="identifier" name="identifier" style="width: 100%; margin-top: 5px;" autofocus spellcheck="false">
+        </div><br />
 
-        <label for="compoundbox">Wikipedia drugbox/chembox code:</label><br />
+        <!-- Compound box type radio selector -->
+        <div>
+          <span>Compound box type:</span>
+          <label for="box-type1">
+            <input type="radio" id="box-type1" name="box-type" value="drugbox" checked>
+            <span>Drugbox</span>
+          </label>
+          <label for="box-type2">
+            <input type="radio" id="box-type2" name="box-type" value="chembox">
+            <span>Chembox</span>
+          </label>
+          <span style="float: right;">
+            <button type="submit">Make</button>
+          </span>
+        </div><br />
+
+        <!-- Compound box code output textarea -->
+        <label for="compoundbox">Wikipedia compound box code:</label><br />
         <div id="compoundbox-container">
 
           <!-- style='display: block;' is essential for syntax highlighting to position correctly -->
           <!-- style='overflow-x: hidden;' and 'overflow-wrap: anywhere' are removed/disabled by syntax highlighter -->
-          <textarea id="compoundbox" rows="25" style="width: 100%; resize: none; margin-top: 5px; display: block; overflow-x: hidden; overflow-wrap: anywhere;" spellcheck="false"></textarea>
+          <textarea id="compoundbox" rows="20" style="width: 100%; resize: none; margin-top: 5px; display: block; overflow-x: hidden; overflow-wrap: anywhere;" spellcheck="false"></textarea>
           <div id="loading-animation"></div>
         </div><br />
 

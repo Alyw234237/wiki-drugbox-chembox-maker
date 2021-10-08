@@ -248,8 +248,8 @@ function fetch_pubchem_rest_json(compound_dict) {
     } else if ((error1 && error1 === 429) || (error2 && error2 === 429)) {
       update_user_message('replace', 'red', '<a href="https://pubchem.ncbi.nlm.nih.gov/">PubChem</a> says too many requests right now. Please try again later.');
     } else {
-      // error='TypeError: Failed to fetch' (when no Internet connection) will go here (as well as other errors)
-      update_user_message('replace', 'red', 'The web request to <a href="https://pubchem.ncbi.nlm.nih.gov/">PubChem</a> failed. You might not have Internet connectivity right now or PubChem might be having issues. Please try again later.');
+      // error=='TypeError: Failed to fetch' (when no Internet connection) will go here (as well as other errors)
+      update_user_message('replace', 'red', 'The web request to <a href="https://pubchem.ncbi.nlm.nih.gov/">PubChem</a> failed. You might not have Internet connectivity right now or PubChem might be having issues or there might be another problem. Please try again. If it still doesn\'t work, try again later.');
     }
     return;
   });
@@ -350,11 +350,11 @@ function fetch_chemidplus_json(compound_dict) {
   .catch(error => {
     fetch_cleanup();
     if (error === 404) {
-      update_user_message('add', 'orange', 'No <a href="https://chem.nlm.nih.gov/chemidplus/">ChemIDplus</a> entry for this compound so couldn\'t pull data from ChemIDplus.');
+      update_user_message('add', 'orange', 'No <a href="https://chem.nlm.nih.gov/chemidplus/">ChemIDplus</a> entry for this compound so couldn\'t pull data from ChemIDplus. Please fill in the missing fields manually.');
     } else if (error === 429) {
       update_user_message('add', 'orange', '<a href="https://chem.nlm.nih.gov/chemidplus/">ChemIDplus</a> says too many requests right now so couldn\'t pull data from ChemIDplus. Please try again later for full parameters.');
     } else {
-      update_user_message('add', 'orange', 'The web request to <a href="https://chem.nlm.nih.gov/chemidplus/">ChemIDplus</a> failed. Hence, couldn\t pull data from it. This happens sometimes. Please try again for full parameters. If it still doesn\'t work, try again later.');
+      update_user_message('add', 'orange', 'The web request to <a href="https://chem.nlm.nih.gov/chemidplus/">ChemIDplus</a> failed. Hence, couldn\'t pull data from it. This happens sometimes. Please try again for full parameters. If it still doesn\'t work, try again later.');
     }
     // Continue without doing handle_fetch_chemidplus()
     construct_compoundbox(compound_dict);
@@ -452,16 +452,22 @@ function handle_fetch_chemidplus(json, compound_dict) {
 // Construct Wikipedia drugbox/chembox
 function construct_compoundbox(compound_dict) {
 
+  // Define not-yet-handled variables for now
+  compound_dict['ChemSpiderID'] = undefined;
+  compound_dict['EINECS'] = undefined;
+
   // Escape special characters with <nowiki> tags
   // Also convert undefined variables to ''
   compound_dict = escape_all(compound_dict);
 
-  // var boxtype = document.getElementById('box_type');
-  var box_type = 'drugbox';
+  // Get box type user input
+  var box_type = document.getElementById('box-type1').checked;
 
-  if (box_type == 'drugbox') {
+  // Drugbox
+  if (box_type == true) {
     make_drugbox(compound_dict);
-  } else if (box_type == 'chembox') {
+  // Chembox
+  } else {
     make_chembox(compound_dict);
   }
 
@@ -642,11 +648,7 @@ function make_drugbox(compound_dict) {
       }
     }
     compoundbox_string += `| synonyms = ` + synonyms_string + `\n`;
-
-    // Warning about long synonyms fields as applicable (maybe handle differently in the future)
-    if (synonyms_string.length > 500) {
-      update_user_message('add', 'orange', 'Synonyms field is long, might want to check/reduce it.');
-    }
+    update_user_message('add', 'green', 'Synonyms field included. Please check and fix it.');
   } else {
     compoundbox_string += `| synonyms = \n`;
   }
@@ -754,34 +756,35 @@ function make_drugbox(compound_dict) {
 // https://en.wikipedia.org/wiki/Template:Chembox
 function make_chembox(compound_dict) {
 
+  // The ChemIDplus are going to error if ChemIDplus not fetched
   var compoundbox_string = `{{Chembox
 <!-- Images -->
 | ImageFile = 
 | ImageSize = 
 | ImageAlt = 
 <!-- Names -->
-| IUPACName = 
-| OtherNames = 
+| IUPACName = ` + compound_dict['IUPACName'] + `
+| OtherNames = ` + compound_dict['ChemIDplus']['synonyms'] + `
 <!-- Sections -->
 | Section1 = {{Chembox Identifiers
-| CASNo = 
-| ChEBI = 
-| ChEMBL = 
-| ChemSpiderID = 
-| DrugBank = 
-| EINECS = 
+| CASNo = ` + compound_dict['ChemIDplus']['CASNo'] + `
+| ChEBI = ` + compound_dict['ChEBI'] + `
+| ChEMBL = ` + compound_dict['ChEMBL'] + `
+| ChemSpiderID = ` + compound_dict['ChemSpiderID'] + `
+| DrugBank = ` + compound_dict['ChemIDplus']['DrugBank'] + `
+| EINECS = ` + compound_dict['EINECS'] + `
 | EC_number = 
 | EC_number_Comment = 
-| InChI = 
-| InChIKey = 
-| KEGG = 
+| InChI = ` + compound_dict['InChI'] + `
+| InChIKey = ` + compound_dict['InChIKey'] + `
+| KEGG = ` + compound_dict['KEGGcompound'] /* Fix */ + `
 | MeSHName = 
-| PubChem = 
-| SMILES = 
+| PubChem = ` + compound_dict['CID'] + `
+| SMILES = ` + compound_dict['IsomericSMILES'] /* Fix */ + `
   }}
 | Section2 = {{Chembox Properties
-| Formula = 
-| MolarMass = 
+| Formula = ` + compound_dict['MolecularFormula'] /* Fix */ + `
+| MolarMass = ` + compound_dict['ChemIDplus']['MolWeight'] /* Fix; also fix g/mol -> */ + ` g/mol
 | Appearance = 
 | Density = 
 | MeltingPt = 
