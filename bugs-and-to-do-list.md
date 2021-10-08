@@ -14,3 +14,42 @@
 * Test other browsers?
 * Remember compound box type selection (localstorage).
 
+## API Notes/Stuff
+
+### Pug REST and Pug View
+
+* Pug View: https://pubchemdocs.ncbi.nlm.nih.gov/pug-view
+* Pug: "If only a subcategory of information is desired, a heading can be used to restrict the data returned. Note that the index as above is a convenient way to see what headings are present for a given record, as not all records will have all possible headings present. For example, to get just the experimental property section:"
+  * https://pubchem.ncbi.nlm.nih.gov/rest/pug_view/data/compound/2244/JSON?heading=Experimental+Properties
+* Pug: "Or even just a single value type, like melting point:"
+  * https://pubchem.ncbi.nlm.nih.gov/rest/pug_view/data/compound/2244/JSON?heading=Melting+Point
+* Examples:
+  * https://pubchem.ncbi.nlm.nih.gov/compound/5757#section=Other-Identifiers
+    * https://pubchem.ncbi.nlm.nih.gov/compound/5757#section=CAS
+    * https://pubchem.ncbi.nlm.nih.gov/compound/5757#section=UNII
+  * https://pubchem.ncbi.nlm.nih.gov/compound/5757#section=Synonyms
+    * https://pubchem.ncbi.nlm.nih.gov/compound/5757#section=MeSH-Entry-Terms
+  * https://pubchem.ncbi.nlm.nih.gov/compound/5757#section=Depositor-Supplied-Synonyms
+
+* Pug REST API: https://pubchem.ncbi.nlm.nih.gov/rest/pug/compound/cid/5757/JSON
+* Pug REST API synonyms: https://pubchem.ncbi.nlm.nih.gov/rest/pug/compound/cid/5757/synonyms/JSON
+* Pug REST API image: https://pubchem.ncbi.nlm.nih.gov/rest/pug/compound/cid/5757/PNG
+  * More reliable than: https://pubchem.ncbi.nlm.nih.gov/image/imgsrv.fcgi?cid=5757&t=l
+* Remember: `pug_view/data/` vs. `pug_view/index/` give different output
+
+### Others
+
+* ChemSpiderID? (requires API key): https://developer.rsc.org/
+* DrugBank (requires API key): https://docs.drugbank.com/v1/
+* GSRS-API is fantastic (CAS (primary vs. non-primary), UNII, ChEMBL, DrugBank, INN, etc.). But only substances in medicines sadly.
+  * https://gsrs.ncats.nih.gov/app/substance/dbe30db9-e2f7-42a1-897d-344c3d8f9272
+  * https://gsrs.ncats.nih.gov/#/api
+* NCI Cactus: https://cactus.nci.nih.gov/chemical/structure (plain-text)
+  * Potentially useful data:
+    * CAS (gives two for E2, doesn't specify primary)
+    * ChemSpiderID (doesn't work)
+    * Names
+  * Example (retrieves InChIKey for E2):
+    * https://cactus.nci.nih.gov/chemical/structure/estradiol/stdinchikey
+    * Result: "InChIKey=VOXZDWNPVJITMN-ZBRFXRBCSA-N" (plain text)
+
