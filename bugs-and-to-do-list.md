@@ -16,7 +16,17 @@
 
 ## API Notes/Stuff
 
-### Pug REST and Pug View
+### PubChem PUG
+
+#### PUG REST
+
+* Pug REST API: https://pubchem.ncbi.nlm.nih.gov/rest/pug/compound/cid/5757/JSON
+* Pug REST API synonyms: https://pubchem.ncbi.nlm.nih.gov/rest/pug/compound/cid/5757/synonyms/JSON
+* Pug REST API image: https://pubchem.ncbi.nlm.nih.gov/rest/pug/compound/cid/5757/PNG
+  * More reliable than: https://pubchem.ncbi.nlm.nih.gov/image/imgsrv.fcgi?cid=5757&t=l
+* Remember: `pug_view/data/` vs. `pug_view/index/` give different output
+
+#### PUG View
 
 * Pug View: https://pubchemdocs.ncbi.nlm.nih.gov/pug-view
 * Pug: "If only a subcategory of information is desired, a heading can be used to restrict the data returned. Note that the index as above is a convenient way to see what headings are present for a given record, as not all records will have all possible headings present. For example, to get just the experimental property section:"
@@ -30,12 +40,6 @@
   * https://pubchem.ncbi.nlm.nih.gov/compound/5757#section=Synonyms
     * https://pubchem.ncbi.nlm.nih.gov/compound/5757#section=MeSH-Entry-Terms
   * https://pubchem.ncbi.nlm.nih.gov/compound/5757#section=Depositor-Supplied-Synonyms
-
-* Pug REST API: https://pubchem.ncbi.nlm.nih.gov/rest/pug/compound/cid/5757/JSON
-* Pug REST API synonyms: https://pubchem.ncbi.nlm.nih.gov/rest/pug/compound/cid/5757/synonyms/JSON
-* Pug REST API image: https://pubchem.ncbi.nlm.nih.gov/rest/pug/compound/cid/5757/PNG
-  * More reliable than: https://pubchem.ncbi.nlm.nih.gov/image/imgsrv.fcgi?cid=5757&t=l
-* Remember: `pug_view/data/` vs. `pug_view/index/` give different output
 
 ### Others
 
