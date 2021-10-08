@@ -8,7 +8,7 @@ Can accept as input [PubChem compound IDs](https://en.wikipedia.org/wiki/PubChem
 
 Purely client-side tool (JavaScript) with no server-side component and hence no risk of server-associated downtime. Uses the [NCBI PubChem PUG (Power User Gateway) REST API](https://pubchemdocs.ncbi.nlm.nih.gov/pug-rest) followed by the [NLM ChemID*plus* API](https://chem.nlm.nih.gov/api/swagger-ui.html) for retrieving compound data used to fill Drugboxes and Chemboxes.
 
-Currently certain identifier fields like ChemSpiderID, IUPHAR_ligand, NIAID_ChemDB, PDB_ligand, and EINECS are not autofilled but could be.
+Currently certain identifier fields like ChemSpiderID, IUPHAR_ligand, NIAID_ChemDB, PDB_ligand, and EINECS are not autofilled but could be in the future.
 
 <!-- Uses [positive lookbehind](https://javascript.info/regexp-lookahead-lookbehind) in JavaScript regular expressions, which is not yet supported in all web browsers. As a result, may not work correctly at this time with [Safari, browsers on iOS, and older browsers](https://caniuse.com/js-regexp-lookbehind). -->
 <!-- ^ Fixed/Replaced current two instances -->
