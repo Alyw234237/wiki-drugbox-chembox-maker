@@ -6,72 +6,12 @@
     <title>Wikipedia Drugbox and Chembox Maker</title>
     <link rel="icon" type="image/svg+xml" href="favicon.svg">
     <script language="JavaScript" src="main.js"></script>
+    <link rel="stylesheet" href="style.css">
 
     <!-- When enabled, can turn on/off syntax highlighting with `syntaxHightlightTextbox.visibility = visible` and `syntaxHightlightTextbox.visibility = hidden;`. -->
     <!--<script language="JavaScript" src="lib/wiki-syntax-highlighter.js"></script>-->
     <script language="JavaScript" src="lib/lodash.min.js"></script> <!-- For chemical-formula.js -->
     <script language="JavaScript" src="lib/chemical-formula.js"></script>
-
-    <style>
-      body {
-        font-family: -apple-system,BlinkMacSystemFont,"helvetica neue",helvetica,roboto,noto,"segoe ui",arial,sans-serif;
-        margin-left: 15px;
-        margin-right: 15px;
-        margin-bottom: 15px;
-      }
-
-      a {
-        color: #0969da;
-        text-decoration: none;
-      }
-
-      div#compoundbox-container {
-        width: 100%;
-        position: relative;
-      }
-
-      /* CSS loader animation (https://www.w3schools.com/howto/howto_css_loader.asp) */
-      div#loading-animation {
-        border: 5px solid #f3f3f3;
-        border-top: 5px solid #555;
-        border-radius: 50%;
-        width: 40px;
-        height: 40px;
-        animation: spin 0.95s linear infinite;
-        position: absolute;
-        top: 34%;
-        right: 50%;
-        display: none;
-      }
-
-      @keyframes spin {
-        0% { transform: rotate(0deg); }
-        100% { transform: rotate(360deg); }
-      }
-
-      .red a, .orange a, .green a, .blue a {
-        text-decoration: underline;
-      }
-      .red, .red a {
-        color: red;
-      }
-      .orange, .orange a {
-        color: orange;
-      }
-      .green, .green a {
-        color: #3CB043;
-      }
-      .blue, .blue a {
-        color: blue;
-      }
-
-      /*.mw-editfont-monospace {
-        font-size: 13px;
-        -moz-tab-size: 4;
-        tab-size: 4;
-        font-family: monospace,monospace;
-      }*/
-    </style>
 
     <!-- Global site tag (gtag.js) - Google Analytics -->
     <script async src="https://www.googletagmanager.com/gtag/js?id=G-T8P0NW6YLS"></script>
@@ -83,46 +23,50 @@
       gtag('config', 'G-T8P0NW6YLS');
     </script>
   </head>
-  <body style="max-width: 800px;">
-    <div style="width: 100%;">
-      <h1>Wikipedia Drugbox and Chembox Maker</h1>
-      <form autocomplete="off" onsubmit="parse_input(); return false;" method="POST">
-        <!-- Compound identifier input box -->
-        <div>
-          <label for="identifier">PubChem compound ID (CID) or URL, compound name, or synonym:</label><br />
-          <input type="text" id="identifier" name="identifier" style="width: 100%; margin-top: 5px;" autofocus spellcheck="false">
-        </div><br />
+  <body>
+    <!-- Page title -->
+    <h1>Wikipedia Drugbox and Chembox Maker</h1>
 
-        <!-- Compound box type radio selector -->
-        <div>
-          <span>Compound box type:</span>
-          <label for="box-type1">
-            <input type="radio" id="box-type1" name="box-type" value="drugbox" checked>
-            <span>Drugbox</span>
-          </label>
-          <label for="box-type2">
-            <input type="radio" id="box-type2" name="box-type" value="chembox">
-            <span>Chembox</span>
-          </label>
-          <span style="float: right;">
-            <button type="submit">Make</button>
-          </span>
-        </div><br />
+    <!-- User input form -->
+    <form autocomplete="off" onsubmit="parse_input(); return false;" method="POST">
+      <!-- Compound identifier input box -->
+      <div>
+        <label for="identifier">PubChem compound ID (CID) or URL, compound name, or synonym:</label><br />
+        <input type="text" id="identifier" name="identifier" style="width: 100%; margin-top: 5px;" autofocus spellcheck="false">
+      </div><br />
 
-        <!-- Compound box code output textarea -->
-        <label for="compoundbox">Wikipedia compound box code:</label><br />
-        <div id="compoundbox-container">
+      <!-- Compound box type radio selector -->
+      <div>
+        <span>Compound box type:</span>
+        <label for="box-type1">
+          <input type="radio" id="box-type1" name="box-type" value="drugbox" checked>
+          <span>Drugbox</span>
+        </label>
+        <label for="box-type2">
+          <input type="radio" id="box-type2" name="box-type" value="chembox">
+          <span>Chembox</span>
+        </label>
+        <span style="float: right;">
+          <button type="submit">Make</button>
+        </span>
+      </div><br />
+    </form>
 
-          <!-- style='display: block;' is essential for syntax highlighting to position correctly -->
-          <!-- style='overflow-x: hidden;' and 'overflow-wrap: anywhere' are removed/disabled by syntax highlighter -->
-          <textarea id="compoundbox" rows="20" style="width: 100%; resize: none; margin-top: 5px; display: block; overflow-x: hidden; overflow-wrap: anywhere;" spellcheck="false"></textarea>
-          <div id="loading-animation"></div>
-        </div><br />
+    <!-- Compound box code output textarea -->
+    <label for="compoundbox">Wikipedia compound box code:</label>
+    <div id="compoundbox-container" class="grow" style="max-height: 350px;">
+      <!-- style='display: block;' is essential for syntax highlighting to position correctly -->
+      <!-- style='overflow-x: hidden;' and 'overflow-wrap: anywhere' are removed/disabled by syntax highlighter -->
+      <textarea id="compoundbox" class="grow" style="width: 100%; min-height: 250px; resize: none; margin-top: 5px; overflow-x: hidden; overflow-wrap: anywhere;" spellcheck="false"></textarea>
+      <div id="loading-animation"></div>
+    </div><br />
 
-        <div id="user_message" style="font-weight: bold;">&nbsp;</div><br />
-        <div style="color: gray; font-size: small;">See the <a href="https://github.com/Alyw234237/wiki-drugbox-chembox-maker" target="_blank">GitHub repository</a> for more information on this tool.</div>
-      </form>
-    </div>
+    <!-- User feedback message -->
+    <div id="user_message" style="font-weight: bold;">&nbsp;</div><br />
+
+    <!-- GitHub info -->
+    <!-- margin-bottom will go away if vertical overscroll while padding-bottom will stay, so use both -->
+    <div style="color: gray; font-size: small; margin-bottom: 25px; padding-bottom: 25px;">See the <a href="https://github.com/Alyw234237/wiki-drugbox-chembox-maker" target="_blank">GitHub repository</a> for more information on this tool.</div>
   </body>
 </html>
 

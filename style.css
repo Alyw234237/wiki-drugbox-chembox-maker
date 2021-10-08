@@ -1,0 +1,99 @@
+
+/* Universal border-box */
+html {
+  box-sizing: border-box;
+}
+*, *:before, *:after {
+  box-sizing: inherit;
+}
+
+html, body {
+  height: 100%;
+}
+body {
+  max-width: 800px;
+  display: flex;
+  flex-direction: column;
+  font-family: -apple-system,BlinkMacSystemFont,"helvetica neue",helvetica,roboto,noto,"segoe ui",arial,sans-serif;
+  margin-left: 15px;
+  margin-right: 15px;
+  margin-bottom: 50px;
+  margin-top: 0px;
+}
+
+a {
+  color: #0969da;
+  text-decoration: none;
+}
+
+.grow {
+  display: flex;
+  flex-direction: column;
+  flex-grow: 1;
+}
+
+#compoundbox-container {
+  width: 100%;
+  position: relative;
+}
+
+/* CSS loader animation (https://www.w3schools.com/howto/howto_css_loader.asp) */
+#loading-animation {
+  border: 5px solid #f3f3f3;
+  border-top: 5px solid #555;
+  border-radius: 50%;
+  width: 50px;
+  height: 50px;
+  animation: spin 0.925s linear infinite;
+  position: absolute;
+  top: calc(50% - 25px); /* Half of element height -> perfectly centered */
+  right: 50%;
+  display: none;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+/* line-height is 1.15em; */
+#user_message {
+  min-height: 2.3em; /* 2 lines with 1.15em line-height */
+}
+
+.red a, .orange a, .green a, .blue a {
+  text-decoration: underline;
+}
+.red, .red a {
+  color: red;
+}
+.orange, .orange a {
+  color: orange;
+}
+.green, .green a {
+  color: #3CB043;
+}
+.blue, .blue a {
+  color: blue;
+}
+
+/* Prettier scrollbar styling */
+::-webkit-scrollbar {
+  background-color: rgb(255, 255, 255) !important;
+  width: 8px !important;
+  height: 8px !important;
+  border-width: initial !important;
+  border-style: none !important;
+  border-color: initial !important;
+  border-image: initial !important;
+}
+
+/* Prettier scrollbar styling */
+::-webkit-scrollbar-thumb {
+  background-color: rgb(191, 191, 191) !important;
+  border-width: 1px !important;
+  border-style: solid !important;
+  border-color: rgb(186, 186, 186) !important;
+  border-image: initial !important;
+}
+

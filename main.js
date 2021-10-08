@@ -104,11 +104,13 @@ function loading_animation(display) {
 }
 
 // Update/change user feedback message
+// Possible method options: 'add', 'replace', 'clear'
+// Possible color options: 'red', 'orange', 'green', 'blue'
 function update_user_message(method, color, message) {
   var user_message = document.getElementById('user_message');
   message = '<span class=' + color + '>' + message + '</span>';
   if (method == 'add') {
-    if (user_message.innerHTML == '&nbsp;') {
+    if (user_message.innerHTML == '') {
       user_message.innerHTML = message;
     } else {
       user_message.innerHTML += ' ' + message;
@@ -116,7 +118,7 @@ function update_user_message(method, color, message) {
   } else if (method == 'replace') {
     user_message.innerHTML = message;
   } else if (method == 'clear') {
-    user_message.innerHTML = "&nbsp;";
+    user_message.innerHTML = '';
   }
   return;
 }
