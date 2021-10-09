@@ -792,10 +792,21 @@ function after_make_compoundbox(compoundbox_string, compound_dict) {
     if (compound_dict['ChemIDplus']['EINECS']) {
       update_user_message('add', 'green', '<a href="https://echa.europa.eu/information-on-chemicals/ec-inventory?p_p_id=disslists_WAR_disslistsportlet&p_p_lifecycle=1&p_p_state=normal&p_p_mode=view&_disslists_WAR_disslistsportlet_javax.portlet.action=searchDissLists&doSearch=true&_disslists_WAR_disslistsportlet_substance_identifier_field_key=' + compound_dict['ChemIDplus']['EINECS'] + '">EINECS</a>.');
     }
-    if (compound_dict['KEGGdrug']) {
-      update_user_message('add', 'green', '<a href="https://www.kegg.jp/entry/' + compound_dict['KEGGdrug'] + '">KEGG</a>.');
-    } else if (compound_dict['KEGGcompound']) {
-      update_user_message('add', 'green', '<a href="https://www.kegg.jp/entry/' + compound_dict['KEGGcompound'] + '">KEGG</a>.');
+    var box_type = document.getElementById('box-type1').checked;
+    // Drugbox
+    if (box_type == true) {
+      if (compound_dict['KEGGdrug']) {
+        update_user_message('add', 'green', '<a href="https://www.kegg.jp/entry/' + compound_dict['KEGGdrug'] + '">KEGG</a>.');
+      } else if (compound_dict['KEGGcompound']) {
+        update_user_message('add', 'green', '<a href="https://www.kegg.jp/entry/' + compound_dict['KEGGcompound'] + '">KEGG</a>.');
+      }
+    // Chembox
+    } else {
+      if (compound_dict['KEGGcompound']) {
+        update_user_message('add', 'green', '<a href="https://www.kegg.jp/entry/' + compound_dict['KEGGcompound'] + '">KEGG</a>.');
+      } else if (compound_dict['KEGGdrug']) {
+        update_user_message('add', 'green', '<a href="https://www.kegg.jp/entry/' + compound_dict['KEGGdrug'] + '">KEGG</a>.');
+      }
     }
     update_user_message('add', 'green', 'Please double-check them for accuracy.');
   }
