@@ -25,10 +25,10 @@
 ### API Request URLs
 
 * PUG REST
-** https://pubchem.ncbi.nlm.nih.gov/rest/pug/compound/estradiol/property/MolecularFormula,MolecularWeight,CanonicalSMILES,IsomericSMILES,InChI,InChIKey,IUPACName,Title/JSON
-** https://pubchem.ncbi.nlm.nih.gov/rest/pug/compound/estradiol/xrefs/RegistryID/JSON
+  * https://pubchem.ncbi.nlm.nih.gov/rest/pug/compound/estradiol/property/MolecularFormula,MolecularWeight,CanonicalSMILES,IsomericSMILES,InChI,InChIKey,IUPACName,Title/JSON
+  * https://pubchem.ncbi.nlm.nih.gov/rest/pug/compound/estradiol/xrefs/RegistryID/JSON
 * ChemIDplus
-** https://chem.nlm.nih.gov/api/data/inchikey/equals/estradiol?data=details&format=json
+  * https://chem.nlm.nih.gov/api/data/inchikey/equals/estradiol?data=details&format=json
 
 ### PubChem PUG
 
