@@ -673,7 +673,6 @@ function make_drugbox(compound_dict) {
 | IUPAC_name = ` + (compound_dict['IUPACName'] || '') + `
 ` + (make_molecular_formula_string(compound_dict['MolecularFormula'], compound_dict['Charge'], 'drugbox') || '') + `
 | SMILES = ` + (compound_dict['IsomericSMILES'] || compound_dict['CanonicalSMILES'] || '') + `
-| Jmol = 
 | StdInChI = ` + (compound_dict['InChI'] || '') + `
 | StdInChI_comment = 
 | StdInChIKey = ` + (compound_dict['InChIKey'] || '') + `
