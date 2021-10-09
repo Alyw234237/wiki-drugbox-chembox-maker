@@ -32,6 +32,13 @@ window.onload = function() {
     parse_input(identifier);
   }
 
+  // Read and set saved box type
+  var box_type = localStorage.getItem('box-type');
+  if (box_type != 'drugbox') {
+    document.getElementById('box-type1').checked = false;
+    document.getElementById('box-type2').checked = true;
+  }
+
   return;
 };
 
@@ -441,6 +448,22 @@ function handle_fetch_chemidplus(json, compound_dict) {
     compound_dict['ChemIDplus']['synonyms'] = [];
     compound_dict['ChemIDplus']['synonyms'] = names;
 
+    // Get EINECS from synonyms
+    // EINECS format: seven-digit number of the form 2XX-XXX-X or 3XX-XXX-X
+    // https://www.chemeurope.com/en/encyclopedia/EINECS_number.html
+    // https://en.wikipedia.org/wiki/European_Community_number
+    var EINECS = compound_dict['ChemIDplus']['synonyms'].find(value => /^EINECS [23][0-9]{2}-[0-9]{3}-[0-9]$/.test(value));
+    if (EINECS) {
+      // Remove 'EINECS' from start of string
+      EINECS = EINECS.replace(/^EINECS /, '');
+      EINECS = EINECS.match(/^[23]{1}[0-9]{2}-[0-9]{3}-[0-9]{1}$/)[0];
+      // Prior way using positive lookbehind
+      //EINECS = EINECS.match(/(?<=^EINECS )[23][0-9]{2}-[0-9]{3}-[0-9]$/)[0];
+      compound_dict['ChemIDplus']['EINECS'] = EINECS;
+    } else {
+      compound_dict['ChemIDplus']['EINECS'] = undefined;
+    }
+
     //console.log(compound_dict['ChemIDplus']);
   }
 
@@ -456,7 +479,6 @@ function construct_compoundbox(compound_dict) {
 
   // Define not-yet-handled variables for now
   compound_dict['ChemSpiderID'] = undefined;
-  compound_dict['EINECS'] = undefined;
 
   // Escape special characters with <nowiki> tags
   // Also convert undefined variables to ''
@@ -468,9 +490,13 @@ function construct_compoundbox(compound_dict) {
   // Drugbox
   if (box_type == true) {
     make_drugbox(compound_dict);
+    // Save box_type for next time
+    localStorage.setItem('box-type', 'drugbox');
   // Chembox
   } else {
     make_chembox(compound_dict);
+    // Save box_type for next time
+    localStorage.setItem('box-type', 'chembox');
   }
 
   return;
@@ -765,28 +791,28 @@ function make_chembox(compound_dict) {
 | ImageSize = 
 | ImageAlt = 
 <!-- Names -->
-| IUPACName = ` + compound_dict['IUPACName'] + `
-| OtherNames = ` + compound_dict['ChemIDplus']['synonyms'] + `
+| IUPACName = ` + (compound_dict['IUPACName'] || '') + `
+| OtherNames = ` + (compound_dict['ChemIDplus']['synonyms'] || '') + `
 <!-- Sections -->
 | Section1 = {{Chembox Identifiers
-| CASNo = ` + compound_dict['ChemIDplus']['CASNo'] + `
-| ChEBI = ` + compound_dict['ChEBI'] + `
-| ChEMBL = ` + compound_dict['ChEMBL'] + `
-| ChemSpiderID = ` + compound_dict['ChemSpiderID'] + `
-| DrugBank = ` + compound_dict['ChemIDplus']['DrugBank'] + `
-| EINECS = ` + compound_dict['EINECS'] + `
+| CASNo = ` + (compound_dict['ChemIDplus']['CASNo'] || '') + `
+| ChEBI = ` + (compound_dict['ChEBI'] || '') + `
+| ChEMBL = ` + (compound_dict['ChEMBL'] || '') + `
+| ChemSpiderID = ` + (compound_dict['ChemSpiderID'] || '') + `
+| DrugBank = ` + (compound_dict['ChemIDplus']['DrugBank'] || '') + `
+| EINECS = ` + (compound_dict['ChemIDplus']['EINECS'] || '') + `
 | EC_number = 
 | EC_number_Comment = 
-| InChI = ` + compound_dict['InChI'] + `
-| InChIKey = ` + compound_dict['InChIKey'] + `
-| KEGG = ` + compound_dict['KEGGcompound'] /* Fix */ + `
+| InChI = ` + (compound_dict['InChI'] || '') + `
+| InChIKey = ` + (compound_dict['InChIKey'] || '') + `
+| KEGG = ` + (compound_dict['KEGGcompound'] || compound_dict['KEGGdrug'] || '') /* Fix? */ + `
 | MeSHName = 
-| PubChem = ` + compound_dict['CID'] + `
-| SMILES = ` + compound_dict['IsomericSMILES'] /* Fix */ + `
+| PubChem = ` + (compound_dict['CID'] || '') + `
+| SMILES = ` + (compound_dict['IsomericSMILES'] || compound_dict['CanonicalSMILES'] || '') /* Fix? */ + `
   }}
 | Section2 = {{Chembox Properties
-| Formula = ` + compound_dict['MolecularFormula'] /* Fix */ + `
-| MolarMass = ` + compound_dict['ChemIDplus']['MolWeight'] /* Fix; also fix g/mol -> */ + ` g/mol
+| Formula = ` + (compound_dict['MolecularFormula'] || '') /* Fix */ + `
+| MolarMass = ` + (compound_dict['ChemIDplus']['MolWeight'] || '') /* Fix?; also fix g/mol -> */ + ` g/mol
 | Appearance = 
 | Density = 
 | MeltingPt = 
@@ -799,6 +825,11 @@ function make_chembox(compound_dict) {
 | AutoignitionPt = 
   }}
 }}`;
+
+  // Warning about not-100%-certainty with KEGG, ChEBI, ChEMBL, and EINECS identifiers for now
+  if (compound_dict['KEGGdrug'] || compound_dict['KEGGcompound'] || compound_dict['ChEBI'] || compound_dict['ChEMBL'] || compound_dict['ChemIDplus']['EINECS']) {
+    update_user_message('add', 'green', 'Autofilled ChEBI, ChEMBL, KEGG, and/or EINECS with form-matching identifiers from synonyms lists. Please double check them for accuracy.');
+  }
 
   // ...
 
