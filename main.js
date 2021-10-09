@@ -832,7 +832,7 @@ function after_make_compoundbox(compoundbox_string, compound_dict) {
       update_user_message('add', 'green', '<a href="' + link + '">IUPHAR_ligand</a>.');
     }
     if (!compound_dict['NIAID_ChemDB']) {
-      var link = 'https://chemdb.niaid.nih.gov/CompoundSearch.aspx?v=C';
+      var link = 'https://chemdb.niaid.nih.gov/CompoundSearch.aspx';
       update_user_message('add', 'green', '<a href="' + link + '">NIAID_ChemDB</a>.');
     }
     if (!compound_dict['PDB_ligand']) {
