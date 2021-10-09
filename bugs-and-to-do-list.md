@@ -12,8 +12,8 @@
   * NIAID ChemDB ID (AIDS#): https://chemdb.niaid.nih.gov/
   * PDB_ligand -> RCSB PDB (Protein Data Bank) ID: https://www.rcsb.org/ and https://www.ebi.ac.uk/pdbe/
 * Automatically apply Wiki formatting (e.g., italics) to IUPAC name?
-  * But could conflict with escaping. Would need to be done appropriately.
   * PubChem PUG API has an IUPAC string with formatting tags already in it that could potentially be used.
+  * But could conflict with escaping. Would need to be done appropriately.
 * More sure-fire ChEBI, ChEMBL, KEGG, EINECS filling?
 * DrugBank missing sometimes even though on PubChem (we get it from ChemIDplus and if it's not there then no DrugBank ID even if it's on PubChem). Need to grab PubChem one if there.
 * Different synonym handling? (Maybe okay, maybe change.)
