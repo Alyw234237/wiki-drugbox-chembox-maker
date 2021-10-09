@@ -66,7 +66,7 @@ a {
 #user_message {
   margin-top: 15px;
   margin-bottom: 15px;
-  min-height: 2.3em; /* 2 lines with 1.15em line-height */
+  min-height: 3.45em; /* 2 lines with 1.15em line-height = 2.3em, 3 lines = 3.45em */
 }
 
 .red a, .orange a, .green a, .blue a {

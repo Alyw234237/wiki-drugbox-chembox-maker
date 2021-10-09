@@ -781,7 +781,6 @@ function after_make_compoundbox(compoundbox_string, compound_dict) {
 
   // Warning about not-100%-certainty with KEGG, ChEBI, ChEMBL, and EINECS identifiers for now
   if (compound_dict['ChEBI'] || compound_dict['ChEMBL'] || compound_dict['ChemIDplus']['EINECS'] || compound_dict['KEGGdrug'] || compound_dict['KEGGcompound']) {
-    //update_user_message('add', 'green', 'Autofilled ChEBI, ChEMBL, EINECS, and/or KEGG with form-matching identifiers from synonyms lists. Please double-check them for accuracy.');
     update_user_message('add', 'green', 'Autofilled the following with form-matching identifiers from synonyms lists:');
     if (compound_dict['ChEBI']) {
       update_user_message('add', 'green', '<a href="https://www.ebi.ac.uk/chebi/searchId.do?chebiId=CHEBI:' + compound_dict['ChEBI'] + '">ChEBI</a>.');
@@ -789,10 +788,11 @@ function after_make_compoundbox(compoundbox_string, compound_dict) {
     if (compound_dict['ChEMBL']) {
       update_user_message('add', 'green', '<a href="https://www.ebi.ac.uk/chembl/compound_report_card/CHEMBL' + compound_dict['ChEMBL'] + '">ChEMBL</a>.');
     }
-    if (compound_dict['ChemIDplus']['EINECS']) {
+    var box_type = document.getElementById('box-type1').checked;
+    // Drugbox only
+    if (box_type == false && compound_dict['ChemIDplus']['EINECS']) {
       update_user_message('add', 'green', '<a href="https://echa.europa.eu/information-on-chemicals/ec-inventory?p_p_id=disslists_WAR_disslistsportlet&p_p_lifecycle=1&p_p_state=normal&p_p_mode=view&_disslists_WAR_disslistsportlet_javax.portlet.action=searchDissLists&doSearch=true&_disslists_WAR_disslistsportlet_substance_identifier_field_key=' + compound_dict['ChemIDplus']['EINECS'] + '">EINECS</a>.');
     }
-    var box_type = document.getElementById('box-type1').checked;
     // Drugbox
     if (box_type == true) {
       if (compound_dict['KEGGdrug']) {
