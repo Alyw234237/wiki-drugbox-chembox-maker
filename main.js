@@ -159,7 +159,6 @@ function is_valid_id(identifier) {
   // As of 5 October 2021, lowest PubChem CID is 1 and highest CID is 156612376 (9 digits) (or 156,612,376)
   // 10 digits (9,999,999,999—63x higher than current highest) seems like a reasonable max for foreseeable future
   // Misses input with leading zeros (which are not valid IDs) but not a big deal
-  // Also handle 'PCID', 'PCCID', etc. type prefixes if any?
   if (identifier.match(/^[0-9]{1,10}$/)) {
     return true;
   // Names are also acceptable
@@ -367,7 +366,8 @@ function handle_fetch_pubchem_rest(json, compound_dict) {
 
 // Fetch ChemIDplus JSON metadata from ChemIDplus API
 function fetch_chemidplus_json(compound_dict) {
-  var fetch_url = 'https://chem.nlm.nih.gov/api/data/inchikey/equals/' + encodeURIComponent(compound_dict['InChIKey']) + 
+  var fetch_url = 'https://chem.nlm.nih.gov/api/data/inchikey/equals/' + 
+                  encodeURIComponent(compound_dict['InChIKey']) + 
                   '?data=details&format=json';
 
   fetch(fetch_url)
@@ -604,26 +604,12 @@ function make_drugbox(compound_dict) {
 <!-- Clinical data -->
 | pronounce = 
 | tradename = 
-| Drugs.com = \n`;
-
-// MedlinePlus
-  if (compound_dict['ChemIDplus'] && compound_dict['ChemIDplus']['MedlinePlus']) {
-    compoundbox_string += `| MedlinePlus = ` + compound_dict['ChemIDplus']['MedlinePlus'] + `\n`;
-  } else {
-    compoundbox_string += `| MedlinePlus = \n`;
-  }
-
-  compoundbox_string += `| licence_CA = <!-- Health Canada may use generic or brand name (generic name preferred) -->\n`;
-  compoundbox_string += `| licence_EU = <!-- EMA uses INN (or special INN_EMA) -->\n`;
-
-  // DailyMedID
-  if (compound_dict['ChemIDplus'] && compound_dict['ChemIDplus']['DailyMedID']) {
-    compoundbox_string += `| DailyMedID = ` + compound_dict['ChemIDplus']['DailyMedID'] + `\n`;
-  } else {
-    compoundbox_string += `| DailyMedID = <!-- DailyMed may use generic or brand name (generic name preferred) -->\n`;
-  }
-
-  compoundbox_string += `| licence_US = <!-- FDA may use generic or brand name (generic name preferred) -->
+| Drugs.com = 
+| MedlinePlus = ` + (compound_dict['ChemIDplus']['MedlinePlus'] || '') + `
+| licence_CA = <!-- Health Canada may use generic or brand name (generic name preferred) -->
+| licence_EU = <!-- EMA uses INN (or special INN_EMA) -->
+| DailyMedID = ` + (compound_dict['ChemIDplus']['DailyMedID'] || '') + `
+| licence_US = <!-- FDA may use generic or brand name (generic name preferred) -->
 | pregnancy_AU = <!-- A / B1 / B2 / B3 / C / D / X -->
 | pregnancy_AU_comment = 
 | pregnancy_category = 
@@ -667,164 +653,32 @@ function make_drugbox(compound_dict) {
 | duration_of_action = 
 | excretion = 
 
-<!-- Identifiers -->\n`;
+<!-- Identifiers -->
+| CAS_number = ` + (compound_dict['ChemIDplus']['CASNo'] || '') + `
+| CAS_supplemental = 
+| PubChem = ` + (compound_dict['CID'] || '') + `
+| PubChemSubstance = 
+| IUPHAR_ligand =  ` + (compound_dict['IUPHAR_ligand'] || '') + `
+| DrugBank = ` + (compound_dict['ChemIDplus']['DrugBank'] || '') + `
+| ChemSpiderID = ` + (compound_dict['ChemSpiderID'] || '') + `
+| UNII = ` + (compound_dict['ChemIDplus']['UNII'] || '') + `
+| KEGG = ` + (compound_dict['KEGGdrug'] || compound_dict['KEGGcompound'] || '') + `
+| ChEBI = ` + (compound_dict['ChEBI'] || '') + `
+| ChEMBL = ` + (compound_dict['ChEMBL'] || '') + `
+| NIAID_ChemDB = ` + (compound_dict['NIAID_ChemDB'] || '') + `
+| PDB_ligand = ` + (compound_dict['PDB_ligand'] || '') + `
+| synonyms = ` + (make_synonyms_list(compound_dict['ChemIDplus']['synonyms']) || '') + `
 
-  // CAS number
-  if (compound_dict['ChemIDplus'] && compound_dict['ChemIDplus']['CASNo']) {
-    compoundbox_string += `| CAS_number = ` + compound_dict['ChemIDplus']['CASNo'] + `\n`;
-  } else {
-    compoundbox_string += `| CAS_number = \n`;
-  }
-  compoundbox_string += `| CAS_supplemental = \n`;
+<!-- Chemical data -->
+| IUPAC_name = ` + (compound_dict['IUPACName'] || '') + `
+` + (make_molecular_formula_string(compound_dict['MolecularFormula'], compound_dict['Charge'], 'drugbox') || '') + `
+| SMILES = ` + (compound_dict['IsomericSMILES'] || compound_dict['CanonicalSMILES'] || '') + `
+| Jmol = 
+| StdInChI = ` + (compound_dict['InChI'] || '') + `
+| StdInChI_comment = 
+| StdInChIKey = ` + (compound_dict['InChIKey'] || '') + `
 
-  // PubChem
-  compoundbox_string += `| PubChem = ` + compound_dict['CID'] + `\n`;
-
-  compoundbox_string += `| PubChemSubstance = \n`;
-
-  // Guide to Pharmacology / IUPHAR ligand
-  // https://www.guidetopharmacology.org/GRAC/LigandListForward?database=all
-  // To-do: fill this in automatically?
-  // https://www.guidetopharmacology.org/webServices.jsp
-  // ^ No API key needed
-  // https://www.guidetopharmacology.org/services/ligands?inchikey=LKJPYSCBVHEWIU-UHFFFAOYSA-N
-  // ^ Result: result[0]['ligandId'] // 2863
-  // But has two entries for E2... ID 1012 and 1013 (good one)
-  // https://www.guidetopharmacology.org/services/ligands?inchikey=VOXZDWNPVJITMN-ZBRFXRBCSA-N
-  compoundbox_string += `| IUPHAR_ligand = \n`;
-
-  // DrugBank
-  if (compound_dict['ChemIDplus'] && compound_dict['ChemIDplus']['DrugBank']) {
-    compoundbox_string += `| DrugBank = ` + compound_dict['ChemIDplus']['DrugBank'] + `\n`;
-  } else {
-    compoundbox_string += `| DrugBank = \n`;
-  }
-
-  // ChemSpider ID (https://developer.rsc.org/)
-  // To-do: fill this in automatically? (Not currently used)
-  if (compound_dict['ChemSpiderID']) {
-    compoundbox_string += `| ChemSpiderID = ` + compound_dict['ChemSpiderID'] + `\n`;
-  } else {
-    compoundbox_string += `| ChemSpiderID = \n`;
-  }
-
-  // UNII
-  if (compound_dict['ChemIDplus'] && compound_dict['ChemIDplus']['UNII']) {
-    compoundbox_string += `| UNII = ` + compound_dict['ChemIDplus']['UNII'] + `\n`;
-  } else {
-    compoundbox_string += `| UNII = \n`;
-  }
-
-  // KEGG
-  // To-do: more sure-fire KEGG filling?
-  if (compound_dict['KEGGdrug']) {
-    compoundbox_string += `| KEGG = ` + compound_dict['KEGGdrug'] + `\n`;
-  } else if (compound_dict['KEGGcompound']) {
-    compoundbox_string += `| KEGG = ` + compound_dict['KEGGcompound'] + `\n`;
-  } else {
-    compoundbox_string += `| KEGG = \n`;
-  }
-
-  // ChEBI
-  // To-do: more sure-fire ChEBI filling?
-  if (compound_dict['ChEBI']) {
-    compoundbox_string += `| ChEBI = ` + compound_dict['ChEBI'] + `\n`;
-  } else {
-    compoundbox_string += `| ChEBI = \n`;
-  }
-
-  // ChEMBL
-  // To-do: more sure-fire ChEMBL filling?
-  if (compound_dict['ChEMBL']) {
-    compoundbox_string += `| ChEMBL = ` + compound_dict['ChEMBL'] + `\n`;
-  } else {
-    compoundbox_string += `| ChEMBL = \n`;
-  }
-
-  // Warning about not-100%-certainty with KEGG, ChEBI, and ChEMBL identifiers for now
-  if (compound_dict['KEGGdrug'] || compound_dict['KEGGcompound'] || compound_dict['ChEBI'] || compound_dict['ChEMBL']) {
-    update_user_message('add', 'green', 'Autofilled ChEBI, ChEMBL, and/or KEGG with form-matching identifiers from the PubChem synonyms list. Please double check them for accuracy.');
-  }
-
-  // NIAID ChemDB ID (AIDS#) (https://chemdb.niaid.nih.gov/)
-  // To-do: fill this in automatically?
-  compoundbox_string += `| NIAID_ChemDB = \n`;
-
-  // RCSB PDB (Protein Data Bank) ID (https://www.rcsb.org/ | https://www.ebi.ac.uk/pdbe/)
-  // To-do: fill this in automatically?
-  compoundbox_string += `| PDB_ligand = \n`;
-
-  // Synonyms
-  // To-do: Change this? Maybe put synonyms in another box and tell user to go through them
-  if (compound_dict['ChemIDplus'] && compound_dict['ChemIDplus']['synonyms'] && 
-      compound_dict['ChemIDplus']['synonyms'].length > 0) {
-    compoundbox_string += `| synonyms = ` + make_synonyms_list(compound_dict['ChemIDplus']['synonyms']) + `\n`;
-    update_user_message('add', 'green', 'Synonyms field included. Please check and fix it.');
-  } else {
-    compoundbox_string += `| synonyms = \n`;
-  }
-
-  compoundbox_string += `\n`;
-
-  compoundbox_string += `<!-- Chemical data -->\n`;
-
-  // IUPAC name
-  if (compound_dict['IUPACName']) {
-    compoundbox_string += `| IUPAC_name = ` + compound_dict['IUPACName'] + `\n`;
-  } else {
-    compoundbox_string += `| IUPAC_name = \n`;
-  }
-
-  // Chemical formula
-  if (compound_dict['MolecularFormula']) {
-    compoundbox_string += make_molecular_formula_string(compound_dict['MolecularFormula'], 
-                                                        compound_dict['Charge'], 'drugbox') + `\n`;
-  }
-
-  // No longer needed as automatically calculated by template drugbox
-  /*if (compound_dict['ChemIDplus'] && compound_dict['ChemIDplus']['MolWeight']) {
-    compoundbox_string += `| molecular_weight = ` + compound_dict['ChemIDplus']['MolWeight'] + ` g/mol\n`;
-  } else if (compound_dict['MolecularWeight']) {
-    compoundbox_string += `| molecular_weight = ` + compound_dict['MolecularWeight'] + ` g/mol\n`;
-  } else {
-    compoundbox_string += `| molecular_weight = \n`;
-  }*/
-
-  // SMILES
-  if (compound_dict['IsomericSMILES']) {
-    compoundbox_string += `| SMILES = ` + compound_dict['IsomericSMILES'] + `\n`;
-  } else if (compound_dict['CanonicalSMILES']) {
-    compoundbox_string += `| SMILES = ` + compound_dict['CanonicalSMILES'] + `\n`;
-  } else {
-    compoundbox_string += `| SMILES = \n`;
-  }
-
-  // Automatically handled by template drugbox (only used to control handling (e.g., turn off))
-  compoundbox_string += `| Jmol = \n`;
-
-  // StdInChI
-  if (compound_dict['InChI']) {
-    compoundbox_string += `| StdInChI = ` + compound_dict['InChI'] + `\n`;
-  } else {
-    compoundbox_string += `| StdInChI = \n`;
-  }
-  compoundbox_string += `| StdInChI_comment = \n`;
-
-  // StdInChIKey
-  if (compound_dict['InChIKey']) {
-    compoundbox_string += `| StdInChIKey = ` + compound_dict['InChIKey'] + `\n`;
-  } else {
-    compoundbox_string += `| StdInChIKey = \n`;
-  }
-
-  compoundbox_string += `\n`;
-
-  // Wiki drugbox: "Physical data. This is entirely optional data, and for most drugs is *not helpful* to the wider readership. Only include if information of particular interest for the drug as to its chemical properties (e.g. in its manufacture or as an important chemical in its own right, e.g. Aspirin)."
-  // https://en.wikipedia.org/wiki/Template:Infobox_drug#Physical_data
-  // Could get via here in any case if considered in the future:
-  // https://pubchem.ncbi.nlm.nih.gov/rest/pug_view/data/compound/5757/JSON?heading=Experimental+Properties
-
-  compoundbox_string += `<!-- Physical data -->
+<!-- Physical data -->
 | density = 
 | density_notes = 
 | melting_point = 
@@ -837,15 +691,8 @@ function make_drugbox(compound_dict) {
 | specific_rotation = 
 }}`;
 
-  // Add some more stuff?
-  var add_more_stuff = false;
-  if (add_more_stuff == true) {
-    compoundbox_string = add_more_stuff(compoundbox_string);
-  }
-
   // Do after construct compoundbox stuff
-
-  update_compoundbox(compoundbox_string);
+  after_make_compoundbox(compoundbox_string, compound_dict);
 
   return compoundbox_string;
 }
@@ -902,30 +749,14 @@ function make_chembox(compound_dict) {
   }}
 }}`;
 
-  // Warning about not-100%-certainty with KEGG, ChEBI, ChEMBL, and EINECS identifiers for now
-  if (compound_dict['KEGGdrug'] || compound_dict['KEGGcompound'] || compound_dict['ChEBI'] || compound_dict['ChEMBL'] || compound_dict['ChemIDplus']['EINECS']) {
-    update_user_message('add', 'green', 'Autofilled ChEBI, ChEMBL, KEGG, and/or EINECS with form-matching identifiers from synonyms lists. Please double check them for accuracy.');
-  }
-
-  if (compound_dict['ChemIDplus']['synonyms']) {
-    update_user_message('add', 'green', 'OtherNames field included. Please check and fix it.');
-  }
-
-  // Add some more stuff?
-  var add_more_stuff = false;
-  if (add_more_stuff == true) {
-    compoundbox_string = add_more_stuff(compoundbox_string);
-  }
-
   // Do after construct compoundbox stuff
-
-  update_compoundbox(compoundbox_string);
+  after_make_compoundbox(compoundbox_string, compound_dict);
 
   return compoundbox_string;
 }
 
 // Do some extra stuff? (I.e., start article)
-function add_more_stuff(compoundbox_string) {
+function add_more_stuff(compoundbox_string, compound_dict) {
 
   compoundbox_string += `\n\n`;
   if (compound_dict['ChemIDplus'] && compound_dict['ChemIDplus']['name_special']) {
@@ -940,8 +771,66 @@ function add_more_stuff(compoundbox_string) {
 }
 
 // Update compoundbox textarea after generating compoundbox
-function update_compoundbox(compoundbox_string) {
+function after_make_compoundbox(compoundbox_string, compound_dict) {
 
+  // Add some more stuff?
+  var add_more_stuff = false;
+  if (add_more_stuff == true) {
+    compoundbox_string = add_more_stuff(compoundbox_string, compound_dict);
+  }
+
+  // Warning about not-100%-certainty with KEGG, ChEBI, ChEMBL, and EINECS identifiers for now
+  if (compound_dict['ChEBI'] || compound_dict['ChEMBL'] || compound_dict['ChemIDplus']['EINECS'] || compound_dict['KEGGdrug'] || compound_dict['KEGGcompound']) {
+    //update_user_message('add', 'green', 'Autofilled ChEBI, ChEMBL, EINECS, and/or KEGG with form-matching identifiers from synonyms lists. Please double-check them for accuracy.');
+    update_user_message('add', 'green', 'Autofilled the following with form-matching identifiers from synonyms lists:');
+    if (compound_dict['ChEBI']) {
+      update_user_message('add', 'green', '<a href="https://www.ebi.ac.uk/chebi/searchId.do?chebiId=CHEBI:' + compound_dict['ChEBI'] + '">ChEBI</a>.');
+    }
+    if (compound_dict['ChEMBL']) {
+      update_user_message('add', 'green', '<a href="https://www.ebi.ac.uk/chembl/compound_report_card/CHEMBL' + compound_dict['ChEMBL'] + '">ChEMBL</a>.');
+    }
+    if (compound_dict['ChemIDplus']['EINECS']) {
+      update_user_message('add', 'green', '<a href="https://echa.europa.eu/information-on-chemicals/ec-inventory?p_p_id=disslists_WAR_disslistsportlet&p_p_lifecycle=1&p_p_state=normal&p_p_mode=view&_disslists_WAR_disslistsportlet_javax.portlet.action=searchDissLists&doSearch=true&_disslists_WAR_disslistsportlet_substance_identifier_field_key=' + compound_dict['ChemIDplus']['EINECS'] + '">EINECS</a>.');
+    }
+    if (compound_dict['KEGGdrug']) {
+      update_user_message('add', 'green', '<a href="https://www.kegg.jp/entry/' + compound_dict['KEGGdrug'] + '">KEGG</a>.');
+    } else if (compound_dict['KEGGcompound']) {
+      update_user_message('add', 'green', '<a href="https://www.kegg.jp/entry/' + compound_dict['KEGGcompound'] + '">KEGG</a>.');
+    }
+    update_user_message('add', 'green', 'Please double-check them for accuracy.');
+  }
+
+  // Warning about synonyms/other names field
+  if (compound_dict['ChemIDplus']['synonyms']) {
+    update_user_message('add', 'green', 'Synonyms field included. Please check and fix it.');
+  }
+
+  // Links to additional fields not autofilled
+  if (!compound_dict['ChemSpiderID'] || !compound_dict['ChemIDplus']['DrugBank'] || !compound_dict['IUPHAR_ligand'] || !compound_dict['NIAID_ChemDB'] || !compound_dict['PDB_ligand']) {
+    update_user_message('add', 'green', 'Links to try for unfilled identifiers:');
+    if (!compound_dict['ChemSpiderID']) {
+      var link = 'http://www.chemspider.com/Search.aspx?q=' + compound_dict['InChIKey'];
+      update_user_message('add', 'green', '<a href="' + link + '">ChemSpiderID</a>.');
+    }
+    if (!compound_dict['ChemIDplus']['DrugBank']) {
+      var link = 'https://go.drugbank.com/unearth/q?searcher=drugs&query=' + compound_dict['InChIKey'];
+      update_user_message('add', 'green', '<a href="' + link + '">DrugBank</a>.');
+    }
+    if (!compound_dict['IUPHAR_ligand']) {
+      var link = 'https://www.guidetopharmacology.org/GRAC/LigandTextSearchForward?searchAcc=' + compound_dict['InChIKey'] + '&accTypes=inchiKey&submitAcc=Search+the+database';
+      update_user_message('add', 'green', '<a href="' + link + '">IUPHAR_ligand</a>.');
+    }
+    if (!compound_dict['NIAID_ChemDB']) {
+      var link = 'https://chemdb.niaid.nih.gov/CompoundSearch.aspx?v=C';
+      update_user_message('add', 'green', '<a href="' + link + '">NIAID_ChemDB</a>.');
+    }
+    if (!compound_dict['PDB_ligand']) {
+      var link = 'https://www.rcsb.org/search?request=' + encodeURIComponent('{"query":{"type":"group","logical_operator":"and","nodes":[{"type":"terminal","service":"chemical","parameters":{"value":"InChI=' + compound_dict['InChIKey'] + '","type":"descriptor","descriptor_type":"InChI","match_type":"graph-exact"}}]},"return_type":"mol_definition","request_info":{"query_id":""},"request_options":{"pager":{"start":0,"rows":25},"scoring_strategy":"combined","sort":[{"sort_by":"score","direction":"desc"}]}}');
+      update_user_message('add', 'green', '<a href="' + link + '">PDB_ligand</a>.');
+    }
+  }
+
+  // Update compoundbox
   var compoundbox = document.getElementById('compoundbox');
   compoundbox.value = compoundbox_string;
 
