@@ -63,7 +63,7 @@
   * xml2json (JS): https://stackoverflow.com/questions/1773550/convert-xml-to-json-and-back-using-javascript
 * ChemSpiderID? (requires API key): https://developer.rsc.org/
 * DrugBank (requires API key): https://docs.drugbank.com/v1/
-* GSRS-API is fantastic (CAS (primary vs. non-primary), UNII, ChEMBL, DrugBank, INN, etc.). But only substances in medicines sadly.
+* GSRS-API is excellent (CAS (primary vs. non-primary), UNII, ChEMBL, DrugBank, INN, etc.). But only substances in medicines unfortunately.
   * https://gsrs.ncats.nih.gov/app/substance/dbe30db9-e2f7-42a1-897d-344c3d8f9272
   * https://gsrs.ncats.nih.gov/#/api
 * NCI Cactus: https://cactus.nci.nih.gov/chemical/structure (plain-text)
