@@ -658,7 +658,7 @@ function make_drugbox(compound_dict) {
 | CAS_supplemental = 
 | PubChem = ` + (compound_dict['CID'] || '') + `
 | PubChemSubstance = 
-| IUPHAR_ligand =  ` + (compound_dict['IUPHAR_ligand'] || '') + `
+| IUPHAR_ligand = ` + (compound_dict['IUPHAR_ligand'] || '') + `
 | DrugBank = ` + (compound_dict['ChemIDplus']['DrugBank'] || '') + `
 | ChemSpiderID = ` + (compound_dict['ChemSpiderID'] || '') + `
 | UNII = ` + (compound_dict['ChemIDplus']['UNII'] || '') + `
