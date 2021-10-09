@@ -6,7 +6,7 @@ A [Wikipedia](https://www.wikipedia.org/) template generator and autofiller for 
 
 Can accept as input [PubChem compound IDs](https://en.wikipedia.org/wiki/PubChem#Databases) (CIDs), PubChem compound URLs, PubChem-indexed compound names, and PubChem-indexed compound synonyms and other identifiers (e.g., CAS number).
 
-Purely client-side tool (JavaScript) with no server-side component and hence no risk of server-associated downtime (unless GitHub Pages goes down!). Uses the [NCBI PubChem PUG (Power User Gateway) REST API](https://pubchemdocs.ncbi.nlm.nih.gov/pug-rest) followed by the [NLM ChemID*plus* API](https://chem.nlm.nih.gov/api/swagger-ui.html) for retrieving compound data used to fill Drugboxes and Chemboxes.
+Purely client-side tool (JavaScript) with no server-side component and hence no risk of server-associated downtime (unless GitHub goes down!). Uses the [NCBI PubChem PUG (Power User Gateway) REST API](https://pubchemdocs.ncbi.nlm.nih.gov/pug-rest) followed by the [NLM ChemID*plus* API](https://chem.nlm.nih.gov/api/swagger-ui.html) for retrieving compound data used to fill Drugboxes and Chemboxes.
 
 Currently a few identifier fields like ChemSpiderID, IUPHAR_ligand, NIAID_ChemDB, and PDB_ligand are not autofilled.
 
