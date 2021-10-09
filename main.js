@@ -34,8 +34,9 @@ window.onload = function() {
 
   // Read and set saved box type
   var box_type = localStorage.getItem('box-type');
-  if (box_type != 'drugbox') {
-    document.getElementById('box-type1').checked = false;
+  if (!box_type || box_type == 'drugbox') {
+    document.getElementById('box-type1').checked = true;
+  } else {
     document.getElementById('box-type2').checked = true;
   }
 
@@ -57,6 +58,22 @@ window.onpopstate = function(event) {
   }
   return;
 };
+
+// Save box_type for next time upon radio click
+function box_type_click() {
+  // Get box type user input
+  var box_type = document.getElementById('box-type1').checked;
+
+  // Drugbox
+  if (box_type == true) {
+    localStorage.setItem('box-type', 'drugbox');
+  // Chembox
+  } else {
+    localStorage.setItem('box-type', 'chembox');
+  }
+  
+  return;
+}
 
 // Escape all strings in object (including nested)
 function escape_all(object) {
@@ -156,6 +173,9 @@ function is_valid_id(identifier) {
 // Called when identifier input field changes
 function parse_input(identifier) {
 
+  // Clear console from last time
+  console.clear();
+
   // Get needed elements
   var compoundbox = document.getElementById('compoundbox');
 
@@ -199,6 +219,7 @@ function do_compoundbox(identifier) {
   // Set up variables and get needed elements
   var pubchem_identifier = decodeURIComponent(identifier); // Decode URI if necessary
   var compound_dict = {};
+  compound_dict['ChemIDplus'] = {}; // For later
   compound_dict['pubchem_identifier'] = pubchem_identifier;
 
   fetch_pubchem_rest_json(compound_dict);
@@ -295,6 +316,11 @@ function handle_fetch_pubchem_rest(json, compound_dict) {
     compound_dict['MolecularFormula'] = molecular_formula;
   }
 
+  // Round down to three decimal places if applicable
+  if (compound_dict['MolecularWeight']) {
+    compound_dict['MolecularWeight'] = parseFloat(parseFloat(compound_dict['MolecularWeight']).toFixed(3));
+  }
+
   // Remove 'InChI=' from start of StdInChI string
   compound_dict['InChI'] = compound_dict['InChI'].replace(/^(InChI=)/, '');
 
@@ -359,9 +385,9 @@ function fetch_chemidplus_json(compound_dict) {
   .catch(error => {
     fetch_cleanup();
     if (error === 404) {
-      update_user_message('add', 'orange', 'No <a href="https://chem.nlm.nih.gov/chemidplus/">ChemIDplus</a> entry for this compound so couldn\'t pull data from ChemIDplus. Please fill in the missing fields manually.');
+      update_user_message('add', 'orange', 'No <a href="https://chem.nlm.nih.gov/chemidplus/">ChemIDplus</a> entry for this compound. Hence, couldn\'t pull data from ChemIDplus. Please fill in the missing fields manually.');
     } else if (error === 429) {
-      update_user_message('add', 'orange', '<a href="https://chem.nlm.nih.gov/chemidplus/">ChemIDplus</a> says too many requests right now so couldn\'t pull data from ChemIDplus. Please try again later for full parameters.');
+      update_user_message('add', 'orange', '<a href="https://chem.nlm.nih.gov/chemidplus/">ChemIDplus</a> says too many requests right now. Hence, couldn\'t pull data from ChemIDplus. Please try again later for full parameters.');
     } else {
       update_user_message('add', 'orange', 'The web request to <a href="https://chem.nlm.nih.gov/chemidplus/">ChemIDplus</a> failed. Hence, couldn\'t pull data from it. This happens sometimes. Please try again for full parameters. If it still doesn\'t work, try again later.');
     }
@@ -377,8 +403,6 @@ function handle_fetch_chemidplus(json, compound_dict) {
 
   var chemidplus_metadata = json;
   //console.log(chemidplus_metadata);
-
-  compound_dict['ChemIDplus'] = {};
 
   // Ensure exactly 1 result (no more or less than this)
   if (chemidplus_metadata && chemidplus_metadata['total'] && chemidplus_metadata['total'] > 0) {
@@ -397,6 +421,11 @@ function handle_fetch_chemidplus(json, compound_dict) {
     compound_dict['ChemIDplus']['name_special'] = summary['na']; // Format: 'Name [USAN:USP:INN:BAN]'
     compound_dict['ChemIDplus']['CASNo'] = summary['rn'];
     compound_dict['ChemIDplus']['MolWeight'] = summary['w']; // Four decimal places
+
+    // Round down to three decimal places if applicable
+    if (compound_dict['ChemIDplus']['MolWeight']) {
+      compound_dict['ChemIDplus']['MolWeight'] = parseFloat((compound_dict['ChemIDplus']['MolWeight']).toFixed(3));
+    }
 
     // Get all ChemIDplus 'resources' items and put into easier to work with form
     var resources_temp = {};
@@ -477,9 +506,6 @@ function handle_fetch_chemidplus(json, compound_dict) {
 // Construct Wikipedia drugbox/chembox
 function construct_compoundbox(compound_dict) {
 
-  // Define not-yet-handled variables for now
-  compound_dict['ChemSpiderID'] = undefined;
-
   // Escape special characters with <nowiki> tags
   // Also convert undefined variables to ''
   compound_dict = escape_all(compound_dict);
@@ -500,6 +526,66 @@ function construct_compoundbox(compound_dict) {
   }
 
   return;
+}
+
+// Make synonyms list string for compoundbox
+function make_synonyms_list(synonyms) {
+  var synonyms_string = '';
+  if (synonyms) {
+    // Remove duplicates
+    // https://stackoverflow.com/questions/9229645/remove-duplicate-values-from-js-array
+    synonyms = [...new Set(synonyms)];
+
+    // Turn array into '; '-delimited string
+    for (var i = 0; i < synonyms.length; i++) {
+      synonyms_string += synonyms[i];
+      if (i != synonyms.length - 1) {
+        synonyms_string += '; ';
+      }
+    }
+  }
+  return synonyms_string;
+}
+
+// Make molecular formula string for compoundbox
+function make_molecular_formula_string(molecular_formula, charge, box_type) {
+  var molecular_formula_string = '';
+  if (molecular_formula) {
+    // Drugbox as well as Chembox without charge
+    if (box_type == 'drugbox' || (box_type == 'chembox' && !charge)) {
+      var index = 0;
+      for (const [key, value] of Object.entries(molecular_formula)) {
+        if (chemical_symbols.includes(key)) {
+          if (index == 0) {
+            molecular_formula_string += `| ` + key + `=` + value;
+          } else {
+            molecular_formula_string += ` | ` + key + `=` + value;
+          }
+        }
+        index++;
+      }
+      if (charge) {
+        molecular_formula_string += ` | charge = ` + charge;
+      }
+    // Chembox with charge (fallback to 'Formula' field as no 'Charge' field in chemboxes)
+    } else {
+      molecular_formula_string += `| Formula = `;
+      for (const [key, value] of Object.entries(molecular_formula)) {
+        if (chemical_symbols.includes(key)) {
+          if (value > 1) {
+            molecular_formula_string += key + `<sub>` + value + `</sub>`;
+          // Skip <sub>1</sub>
+          } else {
+            molecular_formula_string += key;
+          }
+        }
+      }
+      if (charge) {
+        molecular_formula_string += `<sup>` + charge + `</sup>`;
+      }
+    }
+  }
+  return molecular_formula_string;
 }
 
 // Make Wikipedia drugbox
@@ -615,8 +701,12 @@ function make_drugbox(compound_dict) {
   }
 
   // ChemSpider ID (https://developer.rsc.org/)
-  // To-do: fill this in automatically?
-  compoundbox_string += `| ChemSpiderID = \n`;
+  // To-do: fill this in automatically? (Not currently used)
+  if (compound_dict['ChemSpiderID']) {
+    compoundbox_string += `| ChemSpiderID = ` + compound_dict['ChemSpiderID'] + `\n`;
+  } else {
+    compoundbox_string += `| ChemSpiderID = \n`;
+  }
 
   // UNII
   if (compound_dict['ChemIDplus'] && compound_dict['ChemIDplus']['UNII']) {
@@ -665,17 +755,10 @@ function make_drugbox(compound_dict) {
   compoundbox_string += `| PDB_ligand = \n`;
 
   // Synonyms
-  // To-do: Change this... maybe put synonyms in another box and tell user to go through them
+  // To-do: Change this? Maybe put synonyms in another box and tell user to go through them
   if (compound_dict['ChemIDplus'] && compound_dict['ChemIDplus']['synonyms'] && 
       compound_dict['ChemIDplus']['synonyms'].length > 0) {
-    var synonyms_string = '';
-    for (var i = 0; i < compound_dict['ChemIDplus']['synonyms'].length; i++) {
-      synonyms_string += compound_dict['ChemIDplus']['synonyms'][i];
-      if (i != compound_dict['ChemIDplus']['synonyms'].length - 1) {
-        synonyms_string += '; ';
-      }
-    }
-    compoundbox_string += `| synonyms = ` + synonyms_string + `\n`;
+    compoundbox_string += `| synonyms = ` + make_synonyms_list(compound_dict['ChemIDplus']['synonyms']) + `\n`;
     update_user_message('add', 'green', 'Synonyms field included. Please check and fix it.');
   } else {
     compoundbox_string += `| synonyms = \n`;
@@ -694,28 +777,15 @@ function make_drugbox(compound_dict) {
 
   // Chemical formula
   if (compound_dict['MolecularFormula']) {
-    var index = 0;
-    for (const [key, value] of Object.entries(compound_dict['MolecularFormula'])) {
-      if (chemical_symbols.includes(key)) {
-        if (index == 0) {
-          compoundbox_string += `| ` + key + `=` + value;
-        } else {
-          compoundbox_string += ` | ` + key + `=` + value;
-        }
-      }
-      index++;
-    }
-    if (compound_dict['Charge']) {
-      compoundbox_string += ` | charge = ` + compound_dict['Charge'];
-    }
-    compoundbox_string += `\n`;
+    compoundbox_string += make_molecular_formula_string(compound_dict['MolecularFormula'], 
+                                                        compound_dict['Charge'], 'drugbox') + `\n`;
   }
 
-  // No longer needed, automatically calculated by template drugbox (except unusual cases?)
+  // No longer needed as automatically calculated by template drugbox
   /*if (compound_dict['ChemIDplus'] && compound_dict['ChemIDplus']['MolWeight']) {
-    compoundbox_string += `| molecular_weight = ` + compound_dict['ChemIDplus']['MolWeight'] + `\n`;
+    compoundbox_string += `| molecular_weight = ` + compound_dict['ChemIDplus']['MolWeight'] + ` g/mol\n`;
   } else if (compound_dict['MolecularWeight']) {
-    compoundbox_string += `| molecular_weight = ` + compound_dict['MolecularWeight'] + `\n`;
+    compoundbox_string += `| molecular_weight = ` + compound_dict['MolecularWeight'] + ` g/mol\n`;
   } else {
     compoundbox_string += `| molecular_weight = \n`;
   }*/
@@ -784,7 +854,13 @@ function make_drugbox(compound_dict) {
 // https://en.wikipedia.org/wiki/Template:Chembox
 function make_chembox(compound_dict) {
 
-  // The ChemIDplus are going to error if ChemIDplus not fetched
+    // Add 'g/mol' to molecular weight if it exists
+  if (compound_dict['ChemIDplus']['MolWeight']) {
+    compound_dict['ChemIDplus']['MolWeight'] += ' g/mol';
+  } else if (compound_dict['MolecularWeight']) {
+    compound_dict['MolecularWeight'] += ' g/mol';
+  }
+
   var compoundbox_string = `{{Chembox
 <!-- Images -->
 | ImageFile = 
@@ -792,7 +868,7 @@ function make_chembox(compound_dict) {
 | ImageAlt = 
 <!-- Names -->
 | IUPACName = ` + (compound_dict['IUPACName'] || '') + `
-| OtherNames = ` + (compound_dict['ChemIDplus']['synonyms'] || '') + `
+| OtherNames = ` + (make_synonyms_list(compound_dict['ChemIDplus']['synonyms']) || '') + `
 <!-- Sections -->
 | Section1 = {{Chembox Identifiers
 | CASNo = ` + (compound_dict['ChemIDplus']['CASNo'] || '') + `
@@ -805,14 +881,14 @@ function make_chembox(compound_dict) {
 | EC_number_Comment = 
 | InChI = ` + (compound_dict['InChI'] || '') + `
 | InChIKey = ` + (compound_dict['InChIKey'] || '') + `
-| KEGG = ` + (compound_dict['KEGGcompound'] || compound_dict['KEGGdrug'] || '') /* Fix? */ + `
+| KEGG = ` + (compound_dict['KEGGcompound'] || compound_dict['KEGGdrug'] || '') + `
 | MeSHName = 
 | PubChem = ` + (compound_dict['CID'] || '') + `
-| SMILES = ` + (compound_dict['IsomericSMILES'] || compound_dict['CanonicalSMILES'] || '') /* Fix? */ + `
+| SMILES = ` + (compound_dict['IsomericSMILES'] || compound_dict['CanonicalSMILES'] || '') + `
   }}
 | Section2 = {{Chembox Properties
-| Formula = ` + (compound_dict['MolecularFormula'] || '') /* Fix */ + `
-| MolarMass = ` + (compound_dict['ChemIDplus']['MolWeight'] || '') /* Fix?; also fix g/mol -> */ + ` g/mol
+` + (make_molecular_formula_string(compound_dict['MolecularFormula'], compound_dict['Charge'], 'chembox') || '') + `
+| MolarMass = ` + (compound_dict['ChemIDplus']['MolWeight'] || compound_dict['MolecularWeight'] || '') + `
 | Appearance = 
 | Density = 
 | MeltingPt = 
@@ -831,7 +907,9 @@ function make_chembox(compound_dict) {
     update_user_message('add', 'green', 'Autofilled ChEBI, ChEMBL, KEGG, and/or EINECS with form-matching identifiers from synonyms lists. Please double check them for accuracy.');
   }
 
-  // ...
+  if (compound_dict['ChemIDplus']['synonyms']) {
+    update_user_message('add', 'green', 'OtherNames field included. Please check and fix it.');
+  }
 
   // Add some more stuff?
   var add_more_stuff = false;
