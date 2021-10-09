@@ -26,5 +26,5 @@
 * Wiki drugbox template page says this about physical data (https://en.wikipedia.org/wiki/Template:Infobox_drug#Physical_data):
   * > Physical data. This is entirely optional data, and for most drugs is *not helpful* to the wider readership. Only include if information of particular interest for the drug as to its chemical properties (e.g. in its manufacture or as an important chemical in its own right, e.g. Aspirin).
   * Could get via here in any case if considered in the future:
-  * https://pubchem.ncbi.nlm.nih.gov/rest/pug_view/data/compound/5757/JSON?heading=Experimental+Properties
+    * https://pubchem.ncbi.nlm.nih.gov/rest/pug_view/data/compound/5757/JSON?heading=Experimental+Properties
 
