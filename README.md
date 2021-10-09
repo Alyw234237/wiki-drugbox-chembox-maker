@@ -15,5 +15,5 @@ Currently a few identifier fields like ChemSpiderID, IUPHAR_ligand, NIAID_ChemDB
 
 See also [Help:Citation tools - English Wikipedia](https://en.wikipedia.org/wiki/Help:Citation_tools) for more tools like this one. The [Diberri Template builder](https://citation-template-filling.toolforge.org/cgi-bin/index.cgi) is a similar but unrelated tool that can be used to generate Chemboxes with PubChem compound IDs and Drugboxes with [DrugBank](https://drugbank.com/) IDs. However, this tool only fills a few fields; PubChem compound IDs cannot be used to generate Drugboxes; compounds with DrugBank IDs are limited mostly to marketed drugs; and Drugbox generation using DrugBank IDs seems to be broken currently (and [has been for a while](https://web.archive.org/web/20200712040837/https://citation-template-filling.toolforge.org/cgi-bin/index.cgi?type=drugbank_id&id=DB00328)). Hence the need for an alternative tool.
 
-<!-- To add to left sidebar on Wikipedia for quicker access, see User:XXXXX/scripts/XXXXX. -->
+To add to left sidebar on Wikipedia for quicker access, see [User:Qwerfjkl/scripts/chemboxmaker](https://en.wikipedia.org/wiki/User:Qwerfjkl/scripts/chemboxmaker).
 
