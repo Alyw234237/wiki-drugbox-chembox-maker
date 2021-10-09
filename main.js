@@ -818,7 +818,7 @@ function after_make_compoundbox(compoundbox_string, compound_dict) {
 
   // Links to additional fields not autofilled
   if (!compound_dict['ChemSpiderID'] || !compound_dict['ChemIDplus']['DrugBank'] || !compound_dict['IUPHAR_ligand'] || !compound_dict['NIAID_ChemDB'] || !compound_dict['PDB_ligand']) {
-    update_user_message('add', 'green', 'Links to try for additional unfilled identifiers:');
+    update_user_message('add', 'green', 'Links to try for unfilled additional identifiers:');
     if (!compound_dict['ChemSpiderID']) {
       var link = 'http://www.chemspider.com/Search.aspx?q=' + compound_dict['InChIKey'];
       update_user_message('add', 'green', '<a href="' + link + '">ChemSpiderID</a>.');
