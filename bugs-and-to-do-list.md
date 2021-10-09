@@ -9,7 +9,6 @@
 * Different synonym handling? (Maybe okay, maybe change.)
 * Box type radio doesn't change with back/forward. Change? (Manual history handling?)
 * Manual history handling still necessary?
-* Test other browsers?
 
 ## API Notes/Stuff
 
