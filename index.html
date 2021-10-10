@@ -12,6 +12,7 @@
     <!--<script language="JavaScript" src="lib/wiki-syntax-highlighter.js"></script>-->
     <script language="JavaScript" src="lib/lodash.min.js"></script> <!-- For chemical-formula.js -->
     <script language="JavaScript" src="lib/chemical-formula.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
 
     <!-- Global site tag (gtag.js) - Google Analytics -->
     <script async src="https://www.googletagmanager.com/gtag/js?id=G-T8P0NW6YLS"></script>
@@ -57,7 +58,11 @@
     <div id="compoundbox-container" class="grow" style="max-height: 350px;">
       <!-- style='display: block;' is essential for syntax highlighting to position correctly -->
       <!-- style='overflow-x: hidden;' and 'overflow-wrap: anywhere' are removed/disabled by syntax highlighter -->
-      <textarea id="compoundbox" class="grow" style="width: 100%; min-height: 250px; resize: none; margin-top: 5px; overflow-x: hidden; overflow-wrap: anywhere;" spellcheck="false"></textarea>
+      <textarea id="compoundbox" class="grow" style="width: 100%; min-height: 250px; resize: none; margin-top: 5px; overflow-x: hidden; overflow-y: auto; overflow-wrap: anywhere;" spellcheck="false"></textarea>
+      <div id="copy-button" onclick="copy_to_clipboard();">
+        <i id="copy-button-icon" class="fa fa-copy"></i>
+        <span class="tooltiptext" id="copy_tooltip">Copy box</span>
+      </div>
       <div id="loading-animation"></div>
     </div>
 

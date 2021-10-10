@@ -75,6 +75,44 @@ function box_type_click() {
   return;
 }
 
+function copy_to_clipboard() {
+  // Get textarea
+  var compoundbox = document.getElementById("compoundbox");
+
+  // Create hidden element with textarea text to avoid selecting text of textarea
+  var copy_text = document.createElement('input');
+  copy_text.style.display = 'none';
+  document.body.appendChild(copy_text)
+
+  // Assign textarea text to hidden element
+  copy_text.value = compoundbox.value;
+
+  // Select the text of the hidden element
+  copy_text.focus();
+  copy_text.select();
+  copy_text.setSelectionRange(0, 99999); // For mobile devices
+
+  // Copy the text of the hidden element
+  navigator.clipboard.writeText(copy_text.value);
+
+  // Remove the hidden element
+  copy_text.parentNode.removeChild(copy_text);
+  compoundbox.focus();
+
+  // Update copy button hover tooltip to indicate text copied
+  var tooltip = document.getElementById('copy_tooltip');
+  tooltip.innerHTML = "Copied!";
+  tooltip.style.display = 'block';
+
+  // Reset tooltip text after 3 seconds
+  setTimeout(function() {
+    var tooltip = document.getElementById('copy_tooltip');
+    tooltip.style.display = 'none';
+  }, 3000);
+
+  return;
+}
+
 // Escape all strings in object (including nested)
 function escape_all(object) {
   for (var key in object) {
@@ -169,8 +207,17 @@ function is_valid_id(identifier) {
   }
 }
 
+var in_progress = false;
+
 // Called when identifier input field changes
 function parse_input(identifier) {
+
+  // If a parse_input() is already in-progress, don't continue
+  if (in_progress == true) {
+    return;
+  } else {
+    in_progress = true;
+  }
 
   // Clear console from last time
   console.clear();
@@ -199,6 +246,7 @@ function parse_input(identifier) {
 
   if (identifier == '') {
     // update_user_message('replace', 'red', 'No identifier entered. Please try again.');
+    in_progress = false;
     return;
   }
 
@@ -207,6 +255,7 @@ function parse_input(identifier) {
     do_compoundbox(identifier);
   } else {
     update_user_message('replace', 'red', 'Not a valid <a href="https://pubchem.ncbi.nlm.nih.gov/">PubChem</a> compound ID, URL, or name. Please try again.');
+    in_progress = false;
     return;
   }
 
@@ -272,6 +321,7 @@ function fetch_pubchem_rest_json(compound_dict) {
     var error1 = error[0];
     var error2 = error[1];
     fetch_cleanup();
+    in_progress = false;
     if ((error1 && error1 === 404) || (error2 && error2 === 404)) {
       update_user_message('replace', 'red', 'Not a valid <a href="https://pubchem.ncbi.nlm.nih.gov/">PubChem</a> compound ID, URL, or name. Please try again.');
     } else if ((error1 && error1 === 429) || (error2 && error2 === 429)) {
@@ -854,6 +904,8 @@ function after_make_compoundbox(compoundbox_string, compound_dict) {
     compoundbox: compoundbox_string,
   }
   window.history.pushState(state, null);
+
+  in_progress = false;
 
   return;
 }

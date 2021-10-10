@@ -1,5 +1,6 @@
 # Bugs and To-Do List
 
+* Mobile make button wrapped?
 * Add support for one or more of these?: ChemSpiderID, IUPHAR_ligand, NIAID_ChemDB, and PDB_ligand.
   * ChemSpider ID: https://developer.rsc.org/
   * Guide to Pharmacology / IUPHAR ligand:
