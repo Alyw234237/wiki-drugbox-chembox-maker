@@ -75,6 +75,9 @@ function box_type_click() {
   return;
 }
 
+// 'Copied' tooltip timeout
+var tooltip_timeout;
+
 function copy_to_clipboard() {
   // Get textarea
   var compoundbox = document.getElementById("compoundbox");
@@ -104,8 +107,11 @@ function copy_to_clipboard() {
   tooltip.innerHTML = "Copied!";
   tooltip.style.display = 'block';
 
+  // Clear any previous tooltip timeouts
+  clearTimeout(tooltip_timeout);
+
   // Reset tooltip text after 3 seconds
-  setTimeout(function() {
+  tooltip_timeout = setTimeout(function() {
     var tooltip = document.getElementById('copy_tooltip');
     tooltip.style.display = 'none';
   }, 3000);
