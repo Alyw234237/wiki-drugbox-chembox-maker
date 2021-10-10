@@ -97,7 +97,7 @@ function copy_to_clipboard() {
 
   // Remove the hidden element
   copy_text.parentNode.removeChild(copy_text);
-  compoundbox.focus();
+  //compoundbox.focus(); // Causes scroll to reset to top... just skip it
 
   // Update copy button hover tooltip to indicate text copied
   var tooltip = document.getElementById('copy_tooltip');
