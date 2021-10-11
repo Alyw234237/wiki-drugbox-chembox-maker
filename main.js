@@ -650,11 +650,8 @@ function make_drugbox(compound_dict) {
 
   var compoundbox_string = `{{Infobox drug
 | drug_name = 
-| INN = 
-| type = <!-- empty -->
 | image = 
 | width = 
-| alt = 
 | caption = 
 
 <!-- Clinical data -->
@@ -662,42 +659,21 @@ function make_drugbox(compound_dict) {
 | tradename = 
 | Drugs.com = 
 | MedlinePlus = ` + (compound_dict['ChemIDplus']['MedlinePlus'] || '') + `
-| licence_CA = <!-- Health Canada may use generic or brand name (generic name preferred) -->
-| licence_EU = <!-- EMA uses INN (or special INN_EMA) -->
+| licence_CA = 
+| licence_EU = 
 | DailyMedID = ` + (compound_dict['ChemIDplus']['DailyMedID'] || '') + `
-| licence_US = <!-- FDA may use generic or brand name (generic name preferred) -->
-| pregnancy_AU = <!-- A / B1 / B2 / B3 / C / D / X -->
-| pregnancy_AU_comment = 
+| licence_US = 
+| pregnancy_AU = 
 | pregnancy_category = 
 | dependency_liability = 
 | addiction_liability = 
 | routes_of_administration = 
 | class = 
-| ATCvet = 
-| ATC_prefix = <!-- 'none' if uncategorised -->
+| ATC_prefix = 
 | ATC_suffix = 
-| ATC_supplemental = 
 
 <!-- Legal status -->
-| legal_AU = <!-- S2, S3, S4, S5, S6, S7, S8, S9 or Unscheduled -->
-| legal_AU_comment = 
-| legal_BR = <!-- OTC, A1, A2, A3, B1, B2, C1, C2, C3, C4, C5, D1, D2, E, F -->
-| legal_BR_comment = 
-| legal_CA = <!-- OTC, Rx-only, Schedule I, II, III, IV, V, VI, VII, VIII -->
-| legal_CA_comment = 
-| legal_DE = <!-- Anlage I, II, III or Unscheduled -->
-| legal_DE_comment = 
-| legal_NZ = <!-- Class A, B, C -->
-| legal_NZ_comment = 
-| legal_UK = <!-- GSL, P, POM, CD, CD Lic, CD POM, CD No Reg POM, CD (Benz) POM, CD (Anab) POM or CD Inv POM / Class A, B, C -->
-| legal_UK_comment = 
-| legal_US = <!-- OTC / Rx-only / Schedule I, II, III, IV, V -->
-| legal_US_comment = 
-| legal_EU = 
-| legal_EU_comment = 
-| legal_UN = <!-- N I, II, III, IV / P I, II, III, IV -->
-| legal_UN_comment = 
-| legal_status = <!-- For countries not listed above -->
+| legal_status = 
 
 <!-- Pharmacokinetic data -->
 | bioavailability = 
@@ -713,7 +689,6 @@ function make_drugbox(compound_dict) {
 | CAS_number = ` + (compound_dict['ChemIDplus']['CASNo'] || '') + `
 | CAS_supplemental = 
 | PubChem = ` + (compound_dict['CID'] || '') + `
-| PubChemSubstance = 
 | IUPHAR_ligand = ` + (compound_dict['IUPHAR_ligand'] || '') + `
 | DrugBank = ` + (compound_dict['ChemIDplus']['DrugBank'] || '') + `
 | ChemSpiderID = ` + (compound_dict['ChemSpiderID'] || '') + `
@@ -730,20 +705,7 @@ function make_drugbox(compound_dict) {
 ` + (make_molecular_formula_string(compound_dict['MolecularFormula'], compound_dict['Charge'], 'drugbox') || '') + `
 | SMILES = ` + (compound_dict['IsomericSMILES'] || compound_dict['CanonicalSMILES'] || '') + `
 | StdInChI = ` + (compound_dict['InChI'] || '') + `
-| StdInChI_comment = 
 | StdInChIKey = ` + (compound_dict['InChIKey'] || '') + `
-
-<!-- Physical data -->
-| density = 
-| density_notes = 
-| melting_point = 
-| melting_high = 
-| melting_notes = 
-| boiling_point = 
-| boiling_notes = 
-| solubility = 
-| sol_units = 
-| specific_rotation = 
 }}`;
 
   // Do after construct compoundbox stuff
@@ -767,7 +729,6 @@ function make_chembox(compound_dict) {
 <!-- Images -->
 | ImageFile = 
 | ImageSize = 
-| ImageAlt = 
 <!-- Names -->
 | IUPACName = ` + (compound_dict['IUPACName'] || '') + `
 | OtherNames = ` + (make_synonyms_list(compound_dict['ChemIDplus']['synonyms']) || '') + `
@@ -780,7 +741,6 @@ function make_chembox(compound_dict) {
 | DrugBank = ` + (compound_dict['ChemIDplus']['DrugBank'] || '') + `
 | EINECS = ` + (compound_dict['ChemIDplus']['EINECS'] || '') + `
 | EC_number = 
-| EC_number_Comment = 
 | InChI = ` + (compound_dict['InChI'] || '') + `
 | InChIKey = ` + (compound_dict['InChIKey'] || '') + `
 | KEGG = ` + (compound_dict['KEGGcompound'] || compound_dict['KEGGdrug'] || '') + `
