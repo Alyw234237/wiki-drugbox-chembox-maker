@@ -83,7 +83,7 @@ function copy_to_clipboard() {
   var compoundbox = document.getElementById("compoundbox");
 
   // Create hidden element with textarea text to avoid selecting text of textarea
-  var copy_text = document.createElement('input');
+  var copy_text = document.createElement('textarea');
   copy_text.style.display = 'none';
   document.body.appendChild(copy_text)
 
