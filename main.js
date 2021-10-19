@@ -260,7 +260,7 @@ function parse_input(identifier) {
   if (is_valid_id(identifier) == true) {
     do_compoundbox(identifier);
   } else {
-    update_user_message('replace', 'red', 'Not a valid <a href="https://pubchem.ncbi.nlm.nih.gov/">PubChem</a> compound ID, URL, or name. Please try again.');
+    update_user_message('replace', 'red', 'Not a valid <a href="https://pubchem.ncbi.nlm.nih.gov/" target="_blank">PubChem</a> compound ID, URL, or name. Please try again.');
     in_progress = false;
     return;
   }
@@ -342,12 +342,12 @@ async function fetch_chem_data(compound_dict) {
     in_progress = false;
 
     if (error == 404) {
-      update_user_message('replace', 'red', 'Not a valid <a href="https://pubchem.ncbi.nlm.nih.gov/">PubChem</a> compound ID, URL, or name. Please try again.');
+      update_user_message('replace', 'red', 'Not a valid <a href="https://pubchem.ncbi.nlm.nih.gov/" target="_blank">PubChem</a> compound ID, URL, or name. Please try again.');
     } else if (error == 429) {
-      update_user_message('replace', 'red', '<a href="https://pubchem.ncbi.nlm.nih.gov/">PubChem</a> says too many requests right now. Please try again later.');
+      update_user_message('replace', 'red', '<a href="https://pubchem.ncbi.nlm.nih.gov/" target="_blank">PubChem</a> says too many requests right now. Please try again later.');
     // Other errors (e.g., error == "TypeError: Failed to fetch") will go here
     } else {
-      update_user_message('replace', 'red', 'The web request to <a href="https://pubchem.ncbi.nlm.nih.gov/">PubChem</a> failed. You might not have Internet connectivity right now or PubChem might be having issues or there might be another problem. Please try again. If it still doesn\'t work, try again later.');
+      update_user_message('replace', 'red', 'The web request to <a href="https://pubchem.ncbi.nlm.nih.gov/" target="_blank">PubChem</a> failed. You might not have Internet connectivity right now or PubChem might be having issues or there might be another problem. Please try again. If it still doesn\'t work, try again later.');
     }
     return;
   }
@@ -376,10 +376,10 @@ async function fetch_chem_data(compound_dict) {
     } catch(error) {
       //console.log('Error string is -> "' + error + '"');
       if (error == 404) {
-        update_user_message('add', 'orange', 'No <a href="https://chem.nlm.nih.gov/chemidplus/">ChemIDplus</a> entry for this compound. Hence, couldn\'t pull data from ChemIDplus. Please fill in the missing fields manually.');
+        update_user_message('add', 'orange', 'No <a href="https://chem.nlm.nih.gov/chemidplus/" target="_blank">ChemIDplus</a> entry for this compound. Hence, couldn\'t pull data from ChemIDplus. Please fill in the missing fields manually.');
         break_loop = true;
       } else if (error == 429) {
-        update_user_message('add', 'orange', '<a href="https://chem.nlm.nih.gov/chemidplus/">ChemIDplus</a> says too many requests right now. Hence, couldn\'t pull data from ChemIDplus. Please try again later for full parameters.');
+        update_user_message('add', 'orange', '<a href="https://chem.nlm.nih.gov/chemidplus/" target="_blank">ChemIDplus</a> says too many requests right now. Hence, couldn\'t pull data from ChemIDplus. Please try again later for full parameters.');
         break_loop = true;
       // Other errors (e.g., error == "TypeError: Failed to fetch") will go here
       } else {
@@ -389,7 +389,7 @@ async function fetch_chem_data(compound_dict) {
           await new Promise(r => setTimeout(r, 200)); // Pause for 200 ms
         // If last try, quit
         } else {
-          update_user_message('add', 'orange', 'The web request to <a href="https://chem.nlm.nih.gov/chemidplus/">ChemIDplus</a> failed. Hence, couldn\'t pull data from it. This happens sometimes. Please try again for full parameters. If it still doesn\'t work, try again later.');
+          update_user_message('add', 'orange', 'The web request to <a href="https://chem.nlm.nih.gov/chemidplus/" target="_blank">ChemIDplus</a> failed. Hence, couldn\'t pull data from it. This happens sometimes. Please try again for full parameters. If it still doesn\'t work, try again later.');
           break_loop = true;
         }
       }
@@ -421,12 +421,12 @@ async function fetch_chem_data(compound_dict) {
   } catch(error) {
     //console.log('Error string is -> "' + error + '"');
     if (error == 404) {
-      update_user_message('add', 'orange', 'No <a href="https://chemspider.com/">ChemSpider</a> entry and hence no ChemSpider ID for this compound.');
+      update_user_message('add', 'orange', 'No <a href="https://chemspider.com/" target="_blank">ChemSpider</a> entry and hence no ChemSpider ID for this compound.');
     } else if (error == 429) {
-      update_user_message('add', 'orange', '<a href="https://chemspider.com/">ChemSpider</a> says too many requests right now. Hence, couldn\'t fetch ChemSpider ID. Please try again later for this field.');
+      update_user_message('add', 'orange', '<a href="https://chemspider.com/" target="_blank">ChemSpider</a> says too many requests right now. Hence, couldn\'t fetch ChemSpider ID. Please try again later for this field.');
     // Other errors (e.g., error == "TypeError: Failed to fetch") will go here
     } else {
-      update_user_message('add', 'orange', 'The web request to <a href="https://chemspider.com/">ChemSpider</a> failed. Hence, couldn\'t fetch ChemSpider ID. Please try again later for this field.');
+      update_user_message('add', 'orange', 'The web request to <a href="https://chemspider.com/" target="_blank">ChemSpider</a> failed. Hence, couldn\'t fetch ChemSpider ID. Please try again later for this field.');
     }
   }
 
@@ -876,29 +876,29 @@ function after_make_compoundbox(compoundbox_string, compound_dict) {
   if (compound_dict['ChEBI'] || compound_dict['ChEMBL'] || compound_dict['ChemIDplus']['EINECS'] || compound_dict['KEGGdrug'] || compound_dict['KEGGcompound']) {
     update_user_message('add', 'green', 'Autofilled the following with form-matching identifiers from synonyms lists:');
     if (compound_dict['ChEBI']) {
-      update_user_message('add', 'green', '<a href="https://www.ebi.ac.uk/chebi/searchId.do?chebiId=CHEBI:' + compound_dict['ChEBI'] + '">ChEBI</a>.');
+      update_user_message('add', 'green', '<a href="https://www.ebi.ac.uk/chebi/searchId.do?chebiId=CHEBI:' + compound_dict['ChEBI'] + '" target="_blank">ChEBI</a>.');
     }
     if (compound_dict['ChEMBL']) {
-      update_user_message('add', 'green', '<a href="https://www.ebi.ac.uk/chembl/compound_report_card/CHEMBL' + compound_dict['ChEMBL'] + '">ChEMBL</a>.');
+      update_user_message('add', 'green', '<a href="https://www.ebi.ac.uk/chembl/compound_report_card/CHEMBL' + compound_dict['ChEMBL'] + '" target="_blank">ChEMBL</a>.');
     }
     var box_type = document.getElementById('box-type1').checked;
     // Drugbox only
     if (box_type == false && compound_dict['ChemIDplus']['EINECS']) {
-      update_user_message('add', 'green', '<a href="https://echa.europa.eu/information-on-chemicals/ec-inventory?p_p_id=disslists_WAR_disslistsportlet&p_p_lifecycle=1&p_p_state=normal&p_p_mode=view&_disslists_WAR_disslistsportlet_javax.portlet.action=searchDissLists&doSearch=true&_disslists_WAR_disslistsportlet_substance_identifier_field_key=' + compound_dict['ChemIDplus']['EINECS'] + '">EINECS</a>.');
+      update_user_message('add', 'green', '<a href="https://echa.europa.eu/information-on-chemicals/ec-inventory?p_p_id=disslists_WAR_disslistsportlet&p_p_lifecycle=1&p_p_state=normal&p_p_mode=view&_disslists_WAR_disslistsportlet_javax.portlet.action=searchDissLists&doSearch=true&_disslists_WAR_disslistsportlet_substance_identifier_field_key=' + compound_dict['ChemIDplus']['EINECS'] + '" target="_blank">EINECS</a>.');
     }
     // Drugbox
     if (box_type == true) {
       if (compound_dict['KEGGdrug']) {
-        update_user_message('add', 'green', '<a href="https://www.kegg.jp/entry/' + compound_dict['KEGGdrug'] + '">KEGG</a>.');
+        update_user_message('add', 'green', '<a href="https://www.kegg.jp/entry/' + compound_dict['KEGGdrug'] + '" target="_blank">KEGG</a>.');
       } else if (compound_dict['KEGGcompound']) {
-        update_user_message('add', 'green', '<a href="https://www.kegg.jp/entry/' + compound_dict['KEGGcompound'] + '">KEGG</a>.');
+        update_user_message('add', 'green', '<a href="https://www.kegg.jp/entry/' + compound_dict['KEGGcompound'] + '" target="_blank">KEGG</a>.');
       }
     // Chembox
     } else {
       if (compound_dict['KEGGcompound']) {
-        update_user_message('add', 'green', '<a href="https://www.kegg.jp/entry/' + compound_dict['KEGGcompound'] + '">KEGG</a>.');
+        update_user_message('add', 'green', '<a href="https://www.kegg.jp/entry/' + compound_dict['KEGGcompound'] + '" target="_blank">KEGG</a>.');
       } else if (compound_dict['KEGGdrug']) {
-        update_user_message('add', 'green', '<a href="https://www.kegg.jp/entry/' + compound_dict['KEGGdrug'] + '">KEGG</a>.');
+        update_user_message('add', 'green', '<a href="https://www.kegg.jp/entry/' + compound_dict['KEGGdrug'] + '" target="_blank">KEGG</a>.');
       }
     }
     update_user_message('add', 'green', 'Please double-check them for accuracy.');
@@ -914,19 +914,19 @@ function after_make_compoundbox(compoundbox_string, compound_dict) {
     update_user_message('add', 'green', 'Links to try for unfilled additional identifiers:');
     if (!compound_dict['ChemIDplus']['DrugBank']) {
       var link = 'https://go.drugbank.com/unearth/q?searcher=drugs&query=' + compound_dict['InChIKey'];
-      update_user_message('add', 'green', '<a href="' + link + '">DrugBank</a>.');
+      update_user_message('add', 'green', '<a href="' + link + '" target="_blank">DrugBank</a>.');
     }
     if (!compound_dict['IUPHAR_ligand']) {
       var link = 'https://www.guidetopharmacology.org/GRAC/LigandTextSearchForward?searchAcc=' + compound_dict['InChIKey'] + '&accTypes=inchiKey&submitAcc=Search+the+database';
-      update_user_message('add', 'green', '<a href="' + link + '">IUPHAR_ligand</a>.');
+      update_user_message('add', 'green', '<a href="' + link + '" target="_blank">IUPHAR_ligand</a>.');
     }
     if (!compound_dict['NIAID_ChemDB']) {
       var link = 'https://chemdb.niaid.nih.gov/CompoundSearch.aspx';
-      update_user_message('add', 'green', '<a href="' + link + '">NIAID_ChemDB</a>.');
+      update_user_message('add', 'green', '<a href="' + link + '" target="_blank">NIAID_ChemDB</a>.');
     }
     if (!compound_dict['PDB_ligand']) {
       var link = 'https://www.rcsb.org/search?request=' + encodeURIComponent('{"query":{"type":"group","logical_operator":"and","nodes":[{"type":"terminal","service":"chemical","parameters":{"value":"InChI=' + compound_dict['InChIKey'] + '","type":"descriptor","descriptor_type":"InChI","match_type":"graph-exact"}}]},"return_type":"mol_definition","request_info":{"query_id":""},"request_options":{"pager":{"start":0,"rows":25},"scoring_strategy":"combined","sort":[{"sort_by":"score","direction":"desc"}]}}');
-      update_user_message('add', 'green', '<a href="' + link + '">PDB_ligand</a>.');
+      update_user_message('add', 'green', '<a href="' + link + '" target="_blank">PDB_ligand</a>.');
     }
   }
 
