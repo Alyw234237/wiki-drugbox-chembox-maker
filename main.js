@@ -276,13 +276,14 @@ function do_compoundbox(identifier) {
   compound_dict['ChemIDplus'] = {}; // For later
   compound_dict['pubchem_identifier'] = pubchem_identifier;
 
-  fetch_pubchem_rest_json(compound_dict);
+  fetch_chem_data(compound_dict);
 
   return;
 }
 
-// Fetch PubChem compound JSON metadata from PubChem REST API
-function fetch_pubchem_rest_json(compound_dict) {
+// Fetch compound data from chemical sources (PubChem, ChemIDplus, ChemSpider, etc.)
+async function fetch_chem_data(compound_dict) {
+
   waiting_for_fetch_response = true;
 
   // Show loading animation after delay if fetch takes too long
@@ -301,43 +302,137 @@ function fetch_pubchem_rest_json(compound_dict) {
     identifier_string = 'name/' + encodeURIComponent(identifier_string);
   }
 
-  // https://pubchemdocs.ncbi.nlm.nih.gov/pug-rest
-  // Example: https://pubchem.ncbi.nlm.nih.gov/rest/pug/compound/cid/5757/property/MolecularFormula,MolecularWeight,CanonicalSMILES,IsomericSMILES,InChI,InChIKey,IUPACName,Title/JSON
-  var fetch_url1 = 'https://pubchem.ncbi.nlm.nih.gov/rest/pug/compound/' + identifier_string + '/property/MolecularFormula,MolecularWeight,CanonicalSMILES,IsomericSMILES,InChI,InChIKey,IUPACName,Title/JSON';
-  var fetch_url2 = 'https://pubchem.ncbi.nlm.nih.gov/rest/pug/compound/' + identifier_string + '/xrefs/RegistryID/JSON';
+  // Fetch PubChem compound JSON metadata from PubChem REST API
+  try {
+    // https://pubchemdocs.ncbi.nlm.nih.gov/pug-rest
+    // Example: https://pubchem.ncbi.nlm.nih.gov/rest/pug/compound/cid/5757/property/MolecularFormula,MolecularWeight,CanonicalSMILES,IsomericSMILES,InChI,InChIKey,IUPACName,Title/JSON
 
-  Promise.all([
-    fetch(fetch_url1),
-    fetch(fetch_url2)
-  ]).then(([response1, response2]) => {
-    if (response1.ok && response2.ok) {
-      // Get a JSON object from each of the responses
-      return Promise.all([response1, response2].map(response => {
-        return response.json();
-      }));
+    var pubchem_url1 = 'https://pubchem.ncbi.nlm.nih.gov/rest/pug/compound/' + identifier_string + '/property/MolecularFormula,MolecularWeight,CanonicalSMILES,IsomericSMILES,InChI,InChIKey,IUPACName,Title/JSON';
+    var pubchem_url2 = 'https://pubchem.ncbi.nlm.nih.gov/rest/pug/compound/' + identifier_string + '/xrefs/RegistryID/JSON';
+
+    var [pubchem_response1, pubchem_response2] = await Promise.all([
+      fetch(pubchem_url1),
+      fetch(pubchem_url2)
+    ]);
+
+    if (!pubchem_response1.ok) {
+      throw pubchem_response1.status;
     } else {
-      return Promise.reject([response1.status, response2.status]);
+      var pubchem_content1 = await pubchem_response1.json();
+      //console.log('PubChem #1 content:');
+      //console.log(pubchem_content1);
     }
-  }).then(([json1, json2]) => {
+
+    if (!pubchem_response2.ok) {
+      throw pubchem_response2.status;
+    } else {
+      var pubchem_content2 = await pubchem_response2.json();
+      //console.log('PubChem #2 content:');
+      //console.log(pubchem_content2);
+    }
+
     // Combine the two JSON into a single object
-    var json = Object.assign({}, json1, json2);
-    handle_fetch_pubchem_rest(json, compound_dict);
-    return;
-  }).catch(error => {
-    var error1 = error[0];
-    var error2 = error[1];
+    var pubchem_content_combined = Object.assign({}, pubchem_content1, pubchem_content2);
+
+    // Parse PubChem response data and put it into compound data object
+    compound_dict = handle_fetch_pubchem_rest(pubchem_content_combined, compound_dict);
+  } catch(error) {
+    //console.log('Error string is -> "' + error + '"');
     fetch_cleanup();
     in_progress = false;
-    if ((error1 && error1 === 404) || (error2 && error2 === 404)) {
+
+    if (error == 404) {
       update_user_message('replace', 'red', 'Not a valid <a href="https://pubchem.ncbi.nlm.nih.gov/">PubChem</a> compound ID, URL, or name. Please try again.');
-    } else if ((error1 && error1 === 429) || (error2 && error2 === 429)) {
+    } else if (error == 429) {
       update_user_message('replace', 'red', '<a href="https://pubchem.ncbi.nlm.nih.gov/">PubChem</a> says too many requests right now. Please try again later.');
+    // Other errors (e.g., error == "TypeError: Failed to fetch") will go here
     } else {
-      // error=='TypeError: Failed to fetch' (when no Internet connection) will go here (as well as other errors)
       update_user_message('replace', 'red', 'The web request to <a href="https://pubchem.ncbi.nlm.nih.gov/">PubChem</a> failed. You might not have Internet connectivity right now or PubChem might be having issues or there might be another problem. Please try again. If it still doesn\'t work, try again later.');
     }
     return;
-  });
+  }
+
+  // Fetch ChemIDplus JSON metadata from ChemIDplus API
+  // Try up to 50 times (with 200 ms pauses -> 10 seconds in total)
+  var tries = 50;
+  var break_loop = false;
+  for (var i = 0; i < tries; i++) {
+    try {
+      var chemidplus_url = 'https://chem.nlm.nih.gov/api/data/inchikey/equals/' + 
+        encodeURIComponent(compound_dict['InChIKey']) + 
+        '?data=details&format=json';
+
+      var chemidplus_response = await fetch(chemidplus_url);
+
+      if (!chemidplus_response.ok) {
+        throw chemidplus_response.status;
+      } else {
+        var chemidplus_content = await chemidplus_response.json();
+        //console.log('ChemIDplus content:');
+        //console.log(chemidplus_content);
+        compound_dict = handle_fetch_chemidplus(chemidplus_content, compound_dict);
+        break_loop = true;
+      }
+    } catch(error) {
+      //console.log('Error string is -> "' + error + '"');
+      if (error == 404) {
+        update_user_message('add', 'orange', 'No <a href="https://chem.nlm.nih.gov/chemidplus/">ChemIDplus</a> entry for this compound. Hence, couldn\'t pull data from ChemIDplus. Please fill in the missing fields manually.');
+        break_loop = true;
+      } else if (error == 429) {
+        update_user_message('add', 'orange', '<a href="https://chem.nlm.nih.gov/chemidplus/">ChemIDplus</a> says too many requests right now. Hence, couldn\'t pull data from ChemIDplus. Please try again later for full parameters.');
+        break_loop = true;
+      // Other errors (e.g., error == "TypeError: Failed to fetch") will go here
+      } else {
+        // If not last try, pause
+        if (i != tries - 1) {
+          // https://stackoverflow.com/questions/951021/what-is-the-javascript-version-of-sleep
+          await new Promise(r => setTimeout(r, 200)); // Pause for 200 ms
+        // If last try, quit
+        } else {
+          update_user_message('add', 'orange', 'The web request to <a href="https://chem.nlm.nih.gov/chemidplus/">ChemIDplus</a> failed. Hence, couldn\'t pull data from it. This happens sometimes. Please try again for full parameters. If it still doesn\'t work, try again later.');
+          break_loop = true;
+        }
+      }
+    }
+    if (break_loop == true) {
+      break;
+    }
+  }
+
+  // ChemSpider API
+  try {
+    var InChI = 'InChI=' + compound_dict['InChI'];
+    var chemspider_api_url = 'https://www.chemspider.com/InChI.asmx/InChIToCSID?inchi=';
+    var tunnel_url = 'https://tunnel.alyw234237.workers.dev/?q=';
+    // InChI needs to be encoded twice for fetch to work for the tunnel
+    var chemspider_url = tunnel_url + encodeURIComponent(chemspider_api_url + encodeURIComponent(InChI));
+    var chemspider_response = await fetch(chemspider_url);
+    var chemspider_content;
+
+    if (!chemspider_response.ok) {
+      throw chemspider_response.status;
+    } else {
+      chemspider_content = await chemspider_response.text();
+      compound_dict = handle_fetch_chemspider(chemspider_content, compound_dict);
+      if (!compound_dict['ChemSpiderID']) {
+        throw 404;
+      }
+    }
+  } catch(error) {
+    //console.log('Error string is -> "' + error + '"');
+    if (error == 404) {
+      update_user_message('add', 'orange', 'No <a href="https://chemspider.com/">ChemSpider</a> entry and hence no ChemSpider ID for this compound.');
+    } else if (error == 429) {
+      update_user_message('add', 'orange', '<a href="https://chemspider.com/">ChemSpider</a> says too many requests right now. Hence, couldn\'t fetch ChemSpider ID. Please try again later for this field.');
+    // Other errors (e.g., error == "TypeError: Failed to fetch") will go here
+    } else {
+      update_user_message('add', 'orange', 'The web request to <a href="https://chemspider.com/">ChemSpider</a> failed. Hence, couldn\'t fetch ChemSpider ID. Please try again later for this field.');
+    }
+  }
+
+  fetch_cleanup();
+
+  construct_compoundbox(compound_dict);
 
   return;
 }
@@ -415,44 +510,7 @@ function handle_fetch_pubchem_rest(json, compound_dict) {
     compound_dict['KEGGcompound'] = KEGG_compound;
   }
 
-  fetch_chemidplus_json(compound_dict);
-
-  return;
-}
-
-// Fetch ChemIDplus JSON metadata from ChemIDplus API
-function fetch_chemidplus_json(compound_dict) {
-  var fetch_url = 'https://chem.nlm.nih.gov/api/data/inchikey/equals/' + 
-                  encodeURIComponent(compound_dict['InChIKey']) + 
-                  '?data=details&format=json';
-
-  fetch(fetch_url)
-  .then(response => {
-    fetch_cleanup();
-    if (response.ok) {
-      return response.json();
-    }
-    return Promise.reject(response.status);
-  })
-  .then(json => {
-    handle_fetch_chemidplus(json, compound_dict);
-    return;
-  })
-  .catch(error => {
-    fetch_cleanup();
-    if (error === 404) {
-      update_user_message('add', 'orange', 'No <a href="https://chem.nlm.nih.gov/chemidplus/">ChemIDplus</a> entry for this compound. Hence, couldn\'t pull data from ChemIDplus. Please fill in the missing fields manually.');
-    } else if (error === 429) {
-      update_user_message('add', 'orange', '<a href="https://chem.nlm.nih.gov/chemidplus/">ChemIDplus</a> says too many requests right now. Hence, couldn\'t pull data from ChemIDplus. Please try again later for full parameters.');
-    } else {
-      update_user_message('add', 'orange', 'The web request to <a href="https://chem.nlm.nih.gov/chemidplus/">ChemIDplus</a> failed. Hence, couldn\'t pull data from it. This happens sometimes. Please try again for full parameters. If it still doesn\'t work, try again later.');
-    }
-    // Continue without doing handle_fetch_chemidplus()
-    construct_compoundbox(compound_dict);
-    return;
-  });
-
-  return;
+  return compound_dict;
 }
 
 function handle_fetch_chemidplus(json, compound_dict) {
@@ -554,9 +612,29 @@ function handle_fetch_chemidplus(json, compound_dict) {
 
   //console.log(compound_dict);
 
-  construct_compoundbox(compound_dict);
+  return compound_dict;
+}
 
-  return;
+// Extract ChemSpider ID from raw ChemSpider XML response data
+function handle_fetch_chemspider(xml, compound_dict) {
+  // Replace start part one (`<?xml version="1.0" encoding="utf-8"?>`)
+  xml = xml.replace(/^\<\?xml .+\>/, '');
+  xml = xml.replace(/^(\r\n|\r|\n)/, ''); // Newline
+  // Replace start part two (`<string xmlns="http://www.chemspider.com/">`)
+  xml = xml.replace(/^\<string xmlns\="http\:\/\/www\.chemspider\.com\/"\>/, '');
+  // Replace ending (`</string>`)
+  xml = xml.replace(/\<\/string\>$/, '');
+  // Test it to verify ID found
+  var ChemSpiderID;
+  //console.log('xml: ' + xml);
+  if (xml.match(/^[0-9]+$/)) {
+    ChemSpiderID = xml;
+    //console.log('ChemSpiderID: ' + ChemSpiderID);
+  }
+
+  compound_dict['ChemSpiderID'] = ChemSpiderID;
+
+  return compound_dict;
 }
 
 // Construct Wikipedia drugbox/chembox
@@ -832,12 +910,8 @@ function after_make_compoundbox(compoundbox_string, compound_dict) {
   }
 
   // Links to additional fields not autofilled
-  if (!compound_dict['ChemSpiderID'] || !compound_dict['ChemIDplus']['DrugBank'] || !compound_dict['IUPHAR_ligand'] || !compound_dict['NIAID_ChemDB'] || !compound_dict['PDB_ligand']) {
+  if (!compound_dict['ChemIDplus']['DrugBank'] || !compound_dict['IUPHAR_ligand'] || !compound_dict['NIAID_ChemDB'] || !compound_dict['PDB_ligand']) {
     update_user_message('add', 'green', 'Links to try for unfilled additional identifiers:');
-    if (!compound_dict['ChemSpiderID']) {
-      var link = 'http://www.chemspider.com/Search.aspx?q=' + compound_dict['InChIKey'];
-      update_user_message('add', 'green', '<a href="' + link + '">ChemSpiderID</a>.');
-    }
     if (!compound_dict['ChemIDplus']['DrugBank']) {
       var link = 'https://go.drugbank.com/unearth/q?searcher=drugs&query=' + compound_dict['InChIKey'];
       update_user_message('add', 'green', '<a href="' + link + '">DrugBank</a>.');
