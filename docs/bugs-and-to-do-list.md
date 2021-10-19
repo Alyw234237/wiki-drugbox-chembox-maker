@@ -1,8 +1,7 @@
 # Bugs and To-Do List
 
 * Mobile make button wrapped?
-* Add support for one or more of these?: ChemSpiderID, IUPHAR_ligand, NIAID_ChemDB, and PDB_ligand.
-  * ChemSpider ID: https://developer.rsc.org/
+* Add support for one or more of these?: IUPHAR_ligand, NIAID_ChemDB, and PDB_ligand.
   * Guide to Pharmacology / IUPHAR ligand:
     * https://www.guidetopharmacology.org/GRAC/LigandListForward?database=all
     * https://www.guidetopharmacology.org/webServices.jsp (no API key needed)
