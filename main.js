@@ -206,7 +206,7 @@ function is_valid_id(identifier) {
   if (identifier.match(/^[0-9]{1,10}$/)) {
     return true;
   // Names are also acceptable
-  } if (identifier.match(/^[a-z0-9\s-_"'+&%()\[\]]{3,}$/i)) {
+  } if (identifier.match(/^[a-zα-ω0-9\s-_"'+&%()\[\]]{3,}$/i)) {
     return true;
   } else {
     return false;
