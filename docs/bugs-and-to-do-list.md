@@ -28,3 +28,7 @@
   * Could get via here in any case if considered in the future:
     * https://pubchem.ncbi.nlm.nih.gov/rest/pug_view/data/compound/5757/JSON?heading=Experimental+Properties
 
+## New (2022/01/04)
+
+- Says ChemIDplus failed if error later in script... (but shouldn't be encountered normally).
+
